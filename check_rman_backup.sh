@@ -34,7 +34,7 @@ test_dba;
 # for r in $(ps -eaf | grep pmon | grep -v grep | cut -d '_' -f3)
 for r in $(ps -eaf | grep pmon | egrep -v 'grep|ASM1|APX1' | cut -d '_' -f3)
 do
-echo " Base de donnee a traiter: " $r
+# echo " Base de donnee a traiter: " $r
 export ORACLE_SID=$r
 . oraenv -s
 # echo $ORACLE_SID $ORACLE_HOME
