@@ -18,7 +18,6 @@ SELECT    'CREATE '
          || DECODE (ts.bigfile, 'YES', 'BIGFILE ') --assuming smallfile is the default table space
          || 'TABLESPACE "' || ts.tablespace_name || '" DATAFILE ' || CHR(13) || CHR(10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
-         || '  SIZE '
                -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
                || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
                || DECODE (
@@ -51,7 +50,7 @@ GROUP BY ts.tablespace_name,
 ORDER BY ts.tablespace_name;
 
 SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE ' || CHR (13) || CHR (10)
-         || LISTAGG ('  ''' || df.file_name || '''' ||  ' SIZE '
+         || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
                || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
@@ -63,7 +62,8 @@ SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE '
             ddl
     FROM    dba_tablespaces ts,
             dba_temp_files df,
-            (SELECT file_id, sum(decode(bytes,NULL,0,bytes)) used_bytes FROM dba_extents GROUP by file_id) e
+            (SELECT file_id, sum(decode(bytes,NULL,0,bytes)) used_bytes FROM dba_extents GROUP by file_id) e,
+        (select VALUE from v$parameter where name='db_create_file_dest') p
    WHERE e.file_id (+) = df.file_id
          and ts.tablespace_name = df.tablespace_name
 GROUP BY ts.tablespace_name,
