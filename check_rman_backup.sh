@@ -37,7 +37,7 @@ do
 echo " Base de donnee a traiter: " $r
 export ORACLE_SID=$r
 . oraenv -s
-echo $ORACLE_SID $ORACLE_HOME
+# echo $ORACLE_SID $ORACLE_HOME
 sqlplus -S / as sysdba << EOF
 set pages 25 lines 250
 col HEURE_DEBUT for a20
@@ -66,6 +66,7 @@ select
 from V\$RMAN_BACKUP_JOB_DETAILS r, v\$database d, v\$instance i
 where start_time > (SYSDATE - 7) 
 order by SESSION_KEY 
+;
 EOF
 done
 
