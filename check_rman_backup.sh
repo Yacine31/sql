@@ -50,7 +50,7 @@ set head off
 select '----------------------------------  ' 
 || 'Database name : ' || name || ', Instance name = ' || instance_name 
 || '   ----------------------------------'
-from v$database, v$instance;
+from v\$database, v\$instance;
 set head on
 select
         d.NAME || '_' || i.instance_name "DBNAME_INSTANCE"
@@ -63,7 +63,7 @@ select
         ,INPUT_BYTES_DISPLAY "IN_BYTES"
         ,OUTPUT_BYTES_DISPLAY "OUT_BYTES"
         ,r.STATUS
-from V$RMAN_BACKUP_JOB_DETAILS r, v$database d, v$instance i
+from V\$RMAN_BACKUP_JOB_DETAILS r, v\$database d, v\$instance i
 where start_time > (SYSDATE - 7) 
 order by SESSION_KEY 
 EOF
