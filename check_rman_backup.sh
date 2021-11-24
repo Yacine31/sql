@@ -38,7 +38,7 @@ echo " Base de donnee a traiter: " $r
 export ORACLE_SID=$r
 . oraenv -s
 echo $ORACLE_SID $ORACLE_HOME
-sqlplus -S / as sysdba << EOF > /home/oracle/digora/log/rapport_rman_$r.log
+sqlplus -S / as sysdba << EOF
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set serveroutput on
 set linesize 250 heading off;
