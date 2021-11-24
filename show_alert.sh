@@ -13,7 +13,7 @@ GRAS=$(tput bold)
 show_alert()
 {
         echo 
-        echo ${COL_ROUGE}${GRAS_ARR_PLAN}
+        echo ${COL_ROUGE}
         echo ===========
         echo Fichier alert : ${f_alert}
         echo Ctrl + C pour quitter
