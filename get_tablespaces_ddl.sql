@@ -17,7 +17,7 @@ select '-- -------------------------------------------' from dual;
 SELECT    'CREATE '
          || DECODE (ts.bigfile, 'YES', 'BIGFILE ') --assuming smallfile is the default table space
          || 'TABLESPACE "' || ts.tablespace_name || '" DATAFILE ' || CHR(13) || CHR(10)
-         || LISTAGG(decode(p.value, NULL, '''' || df.file_name || '''')  || ' SIZE '
+         || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
          || '  SIZE '
                -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
                || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
@@ -51,7 +51,7 @@ GROUP BY ts.tablespace_name,
 ORDER BY ts.tablespace_name;
 
 SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE ' || CHR (13) || CHR (10)
-         || LISTAGG ('' || df.file_name || '''' ||  ' SIZE '
+         || LISTAGG ('  ''' || df.file_name || '''' ||  ' SIZE '
                || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
