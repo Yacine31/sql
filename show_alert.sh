@@ -40,11 +40,13 @@ else
 fi
 
 NB_PROCESS=$(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l)
+DIAG_DEST=$(echo "show parameter diagnostic_dest" | sqlplus / as sysdba | grep "^diagnostic_dest" | awk '{print $3}')
+
 if [ ${NB_PROCESS} -ne 1 ]; then
         echo 
         echo Base non active ... Tentative d\'ouverture du fichier alertlog par defaut
         echo
-        f_alert="/u01/app/oracle/diag/${SUB_DIR}/$(echo ${ORACLE_SID} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
+        f_alert="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${ORACLE_SID} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
         if [ -e "${f_alert}" ]
         then
                 show_alert
@@ -56,7 +58,7 @@ if [ ${NB_PROCESS} -ne 1 ]; then
         fi
 else
         export DB_UNIQ_NAME=$(echo "show parameter db_unique_name" | sqlplus / as sysdba | grep "^db_unique_name" | awk '{print $3}')
-        f_alert="/u01/app/oracle/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
+        f_alert="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
         show_alert
 fi
 
