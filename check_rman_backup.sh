@@ -39,34 +39,33 @@ export ORACLE_SID=$r
 . oraenv -s
 echo $ORACLE_SID $ORACLE_HOME
 sqlplus -S / as sysdba << EOF
-alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
-set serveroutput on
-set linesize 250 heading off;
-set heading on pagesize 999;
-column status format a25;
-column input_bytes_display format a12;
-column output_bytes_display format a12;
-column device_type format a10;
-declare
-        base varchar2(40) ;
-        serv varchar2(40) ;
-begin
-        select instance_name  into base from v\$instance ;
-        select host_name  into serv from v\$instance ;
-        dbms_output.put_line (' Vous trouverez ci dessous le rapport pour la base de donné :' || base || ' sur le serveur : '|| serv );
-end ;
-/
+set pages 25 lines 250
+col HEURE_DEBUT for a20
+col HEURE_FIN for a20
+col LAST_BKP for a10
+col status for a25
+col IN_BYTES for a15
+col OUT_BYTES for a15
+set head off
+select '----------------------------------  ' 
+|| 'Database name : ' || name || ', Instance name = ' || instance_name 
+|| '   ----------------------------------'
+from v$database, v$instance;
+set head on
 select
-        b.input_type,
-        b.status,
-        to_char(b.start_time,'DD-MM-YY HH24:MI') "Start Time",
-        to_char(b.end_time,'DD-MM-YY HH24:MI') "End Time",
-        b.output_device_type device_type,
-        b.input_bytes_display,
-        b.output_bytes_display
-FROM v\$rman_backup_job_details b
-WHERE b.start_time > (SYSDATE - 30)
-ORDER BY b.start_time asc;
+        d.NAME || '_' || i.instance_name "DBNAME_INSTANCE"
+        ,SESSION_KEY "KEY"
+        ,INPUT_TYPE "BKP_TYPE"
+        ,to_char(START_TIME,'DD-MM-YYYY HH24:MI:SS') "HEURE_DEBUT"
+        ,to_char(END_TIME,'DD-MM-YYYY HH24:MI:SS') "HEURE_FIN"
+  ,to_char(trunc(sysdate) + numtodsinterval(ELAPSED_SECONDS, 'second'),'hh24:mi:ss') "DUREE"
+      ,cast((floor(sysdate-start_time)) as int) || 'd ' || round((round(sysdate-start_time, 2) - cast(floor(sysdate-start_time) as int))*24,0) || 'h' as "LAST_BKP"
+        ,INPUT_BYTES_DISPLAY "IN_BYTES"
+        ,OUTPUT_BYTES_DISPLAY "OUT_BYTES"
+        ,r.STATUS
+from V$RMAN_BACKUP_JOB_DETAILS r, v$database d, v$instance i
+where start_time > (SYSDATE - 7) 
+order by SESSION_KEY 
 EOF
 done
 
