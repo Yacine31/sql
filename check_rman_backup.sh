@@ -13,8 +13,8 @@ unset NLS_LANG
 function test_dba {
 if test "$(id|grep dba)"
   then
-    #return 0
-    echo " OK =>  Test Utilisateur DBA"
+    return 0
+    #echo " OK =>  Test Utilisateur DBA"
   else
     echo ""
     echo "============================================================="
