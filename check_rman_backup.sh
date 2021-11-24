@@ -1,6 +1,6 @@
 #!/bin/bash
 #---------------------------------------------------------------------------
-# 24/01/2019 - YAO Adaptation après migration Crossway vers oda-cw
+# 24/11/2021 - YAO nouvelle version
 #---------------------------------------------------------------------------
 # Environnement Variables
 export NLS_DATE_FORMAT='DD/MM/YYYY HH24:MI:SS'
