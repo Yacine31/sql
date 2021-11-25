@@ -12,6 +12,8 @@ set head off pages 0 feedback off lines 200
 
 select '------- HOSTNAME : '||host_name||', DB_NAME : '||name||', VERSION : '||version from v$database,v$instance;
 
+select '------- Datafiles : ' from dual;
+
 SELECT    'CREATE '
          || DECODE (ts.bigfile, 'YES', 'BIGFILE ') --assuming smallfile is the default table space
          || 'TABLESPACE "' || ts.tablespace_name || '" DATAFILE ' || CHR(13) || CHR(10)
@@ -46,6 +48,8 @@ GROUP BY ts.tablespace_name,
          ts.status,
          ts.block_size
 ORDER BY ts.tablespace_name;
+
+select '------- Tempfiles : ' from dual;
 
 SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE ' || CHR (13) || CHR (10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
