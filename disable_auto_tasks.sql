@@ -7,6 +7,7 @@
 set lines 180 pages 1000
 col client_name for a40
 col attributes for a60
+col service_name for a20
 select client_name, status,attributes,service_name from dba_autotask_client
 /
  
