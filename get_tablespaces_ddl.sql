@@ -10,9 +10,9 @@
 
 set head off pages 0 feedback off lines 200
 
-select '-- -------------------------------------------' from dual;
-select '-- HOSTNAME:'||host_name||';DB_NAME:'||name||';VERSION='||version from v$database,v$instance;
-select '-- -------------------------------------------' from dual;
+-- select '-- -------------------------------------------' from dual;
+select '-- HOSTNAME : '||host_name||' ---- DB_NAME : '||name||' ---- VERSION : '||version from v$database,v$instance;
+-- select '-- -------------------------------------------' from dual;
 
 SELECT    'CREATE '
          || DECODE (ts.bigfile, 'YES', 'BIGFILE ') --assuming smallfile is the default table space
