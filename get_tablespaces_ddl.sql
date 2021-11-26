@@ -23,7 +23,7 @@ SELECT    'CREATE '
                || nvl(floor(e.used_bytes/1024/1024),10) || 'M ' -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
-                     'YES',    '  AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size/1024/1024) || ' MAXSIZE '
+                     'YES',    '  AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
                             || CASE
                                   WHEN maxbytes < POWER (1024, 3) * 2
                                   THEN
@@ -54,10 +54,11 @@ select '------- Tempfiles : ' from dual;
 
 SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE ' || CHR (13) || CHR (10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
-               || nvl(flor(e.used_bytes/1024/1024),10) || 'M ' -- si taille nulle, on retourne 10M
+               || nvl(floor(e.used_bytes/1024/1024),10) || 'M ' -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size /1024/1024) || 'M MAXSIZE ' || FLOOR (maxbytes / POWER (1024, 2)) || 'M'
+                     'YES',    ' AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size /1024/1024) || 'M MAXSIZE ' 
+                     || FLOOR (maxbytes / POWER (1024, 2)) || 'M'
                         ),
                ',' || CHR (13) || CHR (10))
             WITHIN GROUP (ORDER BY df.file_id, df.file_name)
