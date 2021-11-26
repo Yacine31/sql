@@ -51,7 +51,7 @@ show_alert()
                 -e "s,^($(date +'%Y-%m-%d')).*,${COL_JAUNE}&${COL_NORMAL},g" \
                 -e "s,.*(ALTER|alter|CREATE|create).*,${GRAS}${COL_VERT}&${COL_NORMAL},g" \
                 -e "s,.*WARNING.*,${COL_VIOLET}&${COL_NORMAL},g" \
-                -e "s,.*(ERROR:|ORA-|drop|DROP|{D,d}elete).*,${GRAS}${COL_ROUGE}&${COL_NORMAL},g" \
+                -e "s,.*(ERROR:|ORA-|drop|DROP|Delete).*,${GRAS}${COL_ROUGE}&${COL_NORMAL},g" \
                 -e "s,^(ARC|RFS|LNS|MRP).*,${COL_BLUE}&${COL_NORMAL},g" \
                 -e "s,.*(Online Redo|online redo|Current log).*,${COL_CYAN}&${COL_NORMAL},g" \
                 -e "s,.*,${COL_NORMAL}&${COL_NORMAL},"
