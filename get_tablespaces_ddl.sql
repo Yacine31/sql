@@ -19,7 +19,12 @@ SELECT    'CREATE '
          || 'TABLESPACE "' || ts.tablespace_name || '" DATAFILE ' || CHR(13) || CHR(10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
                -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
-               || decode(floor(e.used_bytes/1024/1024),0,10,floor(e.used_bytes/1024/1024)) || 'M ' -- si taille nulle, on retourne 10M
+               -- || decode(floor(e.used_bytes/1024/1024),0,10,floor(e.used_bytes/1024/1024)) || 'M ' -- si taille nulle, on retourne 10M
+               || CASE
+                     WHEN e.used_bytes < 1024*1024
+                     THEN '10M'
+                     ELSE TO_CHAR(floor(104857/(1024*1024))) || 'M'
+                  END
                || DECODE (
                      df.autoextensible,
                      'YES',    ' AUTOEXTEND ON NEXT ' || df.increment_by*ts.block_size || ' MAXSIZE '
