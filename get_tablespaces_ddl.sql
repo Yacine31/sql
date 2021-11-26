@@ -23,7 +23,7 @@ SELECT    'CREATE '
                || nvl(floor(e.used_bytes/1024/1024),10) || 'M ' -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
-                     'YES',    '  AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
+                     'YES',    ' AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
                             || CASE
                                   WHEN maxbytes < POWER (1024, 3) * 2
                                   THEN
