@@ -20,10 +20,10 @@ SELECT    'CREATE '
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
                -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
                -- || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
-               || nvl(floor(e.used_bytes/1024/1024),10) || 'M ' -- si taille nulle, on retourne 10M
+               || decode(floor(e.used_bytes/1024/1024),0,10) || 'M ' -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
+                     'YES',    ' AUTOEXTEND ON NEXT ' || decode(floor(df.increment_by*ts.block_size/1024/1024),0,10) || 'M MAXSIZE '
                             || CASE
                                   WHEN maxbytes < POWER (1024, 3) * 2
                                   THEN
