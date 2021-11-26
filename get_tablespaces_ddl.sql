@@ -30,7 +30,7 @@ SELECT    'CREATE '
                      df.autoextensible,
                      'YES',    ' AUTOEXTEND ON NEXT ' || ceil(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
                             || CASE
-                                  WHEN maxbytes < POWER (1024, 3) * 2
+                                  WHEN maxbytes < POWER (1024, 2) 
                                   THEN
                                      TO_CHAR (maxbytes)
                                   ELSE
