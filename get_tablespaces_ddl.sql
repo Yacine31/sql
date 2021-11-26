@@ -21,9 +21,10 @@ SELECT    'CREATE '
                -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
                -- || decode(floor(e.used_bytes/1024/1024),0,10,floor(e.used_bytes/1024/1024)) || 'M ' -- si taille nulle, on retourne 10M
                || CASE
-                     WHEN e.used_bytes < 1024*1024
+                    -- si la taille est nulle ou < 1M on retourne 10M
+                     WHEN e.used_bytes is NULL or e.used_bytes < (1024*1024)
                      THEN '10M'
-                     ELSE TO_CHAR(floor(e.used_bytes/(1024*1024))) || 'M'
+                     ELSE to_char(floor(e.used_bytes/(1024*1024))) || 'M'
                   END
                || DECODE (
                      df.autoextensible,
@@ -56,7 +57,13 @@ select '------- Tempfiles : ' from dual;
 
 SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE ' || CHR (13) || CHR (10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
-               || decode(floor(e.used_bytes/1024/1024),0,10,floor(e.used_bytes/1024/1024)) || 'M ' -- si taille nulle, on retourne 10M
+               -- || decode(floor(e.used_bytes/1024/1024),0,10,floor(e.used_bytes/1024/1024)) || 'M ' -- si taille nulle, on retourne 10M
+               || CASE
+                    -- si la taille est nulle ou < 1M on retourne 10M
+                     WHEN e.used_bytes is NULL or e.used_bytes < (1024*1024)
+                     THEN '10M'
+                     ELSE to_char(floor(e.used_bytes/(1024*1024))) || 'M'
+                  END
                || DECODE (
                      df.autoextensible,
                      'YES',    ' AUTOEXTEND ON NEXT ' || df.increment_by*ts.block_size || ' MAXSIZE ' 
