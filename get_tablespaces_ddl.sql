@@ -23,7 +23,7 @@ SELECT    'CREATE '
                || CASE
                      WHEN e.used_bytes < 1024*1024
                      THEN '10M'
-                     ELSE TO_CHAR(floor(104857/(1024*1024))) || 'M'
+                     ELSE TO_CHAR(floor(e.used_bytes/(1024*1024))) || 'M'
                   END
                || DECODE (
                      df.autoextensible,
