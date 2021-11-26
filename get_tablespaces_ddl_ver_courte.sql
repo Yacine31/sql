@@ -16,7 +16,7 @@ WHERE ts.tablespace_name NOT IN ( 'SYSTEM', 'SYSAUX' )
     AND ts.tablespace_name NOT LIKE '%UNDO%'
     AND e.file_id (+) = df.file_id
     AND ts.tablespace_name = df.tablespace_name
-GROUP BY ts.tablespace_name, ts.bigfile, ts.logging, ts.status, ts.block_size
+GROUP BY ts.tablespace_name, ts.bigfile, ts.block_size
 ORDER BY ts.tablespace_name;
 
 EXIT

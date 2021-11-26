@@ -45,8 +45,8 @@ SELECT    'CREATE '
 GROUP BY ts.tablespace_name,
          ts.bigfile,
          ts.logging,
-         ts.status,
-         ts.block_size
+--         ts.status,
+--         ts.block_size
 ORDER BY ts.tablespace_name;
 
 select '------- Tempfiles : ' from dual;
