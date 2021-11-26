@@ -40,7 +40,7 @@ SELECT 'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE ' ||
                THEN '1M'
                ELSE to_char(floor(e.used_bytes/(1024*1024))) || 'M'
             END
-         || DECODE (df.autoextensible, 'YES', ' AUTOEXTEND ON NEXT '), 
+         || DECODE (df.autoextensible, 'YES', ' AUTOEXTEND ON'), 
          ',' || CHR (13) || CHR (10))
       WITHIN GROUP (ORDER BY df.file_id, df.file_name)
       || ';'
