@@ -50,13 +50,15 @@ then
 	echo "\$ORACLE_SID not set and no INSTANCE Supplied on the command line."
 	exit 1
 fi
+
+test_instance || { echo "Instance ${ORACLE_SID} not started !!";  exit 1 ; }
+
 # Set up the environment
 export ORACLE_SID
 export ORAENV_ASK=NO
 . oraenv -s >/dev/null
 
 
-test_instance || { echo "Instance ${ORACLE_SID} not started !!";  exit 1 ; }
 
 SIZE=`${ORACLE_HOME}/bin/sqlplus -s / as sysdba <<EOF
 set lines 150 feedback off pages 0
