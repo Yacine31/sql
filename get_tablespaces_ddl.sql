@@ -10,7 +10,7 @@
 
 set head off pages 0 feedback off lines 200
 
-select '------- HOSTNAME : '||host_name||', DB_NAME : '||name||', VERSION : '||version || '-------' from v$database,v$instance;
+select '------- HOSTNAME : '||host_name||', DB_NAME : '||name||', VERSION : '||version || ' -------' from v$database,v$instance;
 
 select '------- Datafiles -------' from dual;
 
@@ -28,7 +28,7 @@ SELECT    'CREATE '
                   END
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || df.increment_by*ts.block_size || ' MAXSIZE '
+                     'YES',    ' AUTOEXTEND ON NEXT ' || ceil(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
                             || CASE
                                   WHEN maxbytes < POWER (1024, 3) * 2
                                   THEN
@@ -66,7 +66,7 @@ SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE '
                   END
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || df.increment_by*ts.block_size || ' MAXSIZE ' 
+                     'YES',    ' AUTOEXTEND ON NEXT ' || ceil(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE ' 
                      || FLOOR (maxbytes / POWER (1024, 2)) || 'M'
                         ),
                ',' || CHR (13) || CHR (10))
