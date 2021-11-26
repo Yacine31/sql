@@ -44,9 +44,9 @@ SELECT    'CREATE '
          and ts.tablespace_name = df.tablespace_name
 GROUP BY ts.tablespace_name,
          ts.bigfile,
-         ts.logging,
+--         ts.logging,
 --         ts.status,
---         ts.block_size
+         ts.block_size
 ORDER BY ts.tablespace_name;
 
 select '------- Tempfiles : ' from dual;
