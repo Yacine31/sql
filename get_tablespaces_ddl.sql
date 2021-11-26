@@ -18,24 +18,24 @@ SELECT    'CREATE '
          || DECODE (ts.bigfile, 'YES', 'BIGFILE ') --assuming smallfile is the default table space
          || 'TABLESPACE "' || ts.tablespace_name || '" DATAFILE ' || CHR(13) || CHR(10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
-               -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
-               -- || decode(floor(e.used_bytes/1024/1024),0,10,floor(e.used_bytes/1024/1024)) || 'M ' -- si taille nulle, on retourne 10M
                || CASE
-                    -- si la taille est nulle ou < 1M on retourne 10M
+                    -- si la taille est nulle ou < 1M on retourne 1M
                      WHEN e.used_bytes is NULL or e.used_bytes < (1024*1024)
-                     THEN '10M'
+                     THEN '1M'
                      ELSE to_char(floor(e.used_bytes/(1024*1024))) || 'M'
                   END
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || ceil(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
-                            || CASE
-                                  WHEN maxbytes < POWER (1024, 2) 
-                                  THEN
-                                     TO_CHAR (maxbytes)
-                                  ELSE
-                                        TO_CHAR (FLOOR (maxbytes / POWER (1024, 2))) || 'M'
-                               END),
+                     'YES', 
+                     ' AUTOEXTEND ON NEXT ' || ceil(df.increment_by*ts.block_size/1024/1024) || 'M MAXSIZE '
+                     || TO_CHAR (FLOOR (maxbytes / POWER (1024, 2))) || 'M'),
+--                            || CASE
+--                                  WHEN maxbytes < POWER (1024, 2) 
+--                                  THEN
+--                                     TO_CHAR (maxbytes)
+--                                  ELSE
+--                                        TO_CHAR (FLOOR (maxbytes / POWER (1024, 2))) || 'M'
+--                               END),
                ',' || CHR (13) || CHR (10))
             WITHIN GROUP (ORDER BY df.file_id, df.file_name)
          || ';'
