@@ -19,11 +19,10 @@ SELECT    'CREATE '
          || 'TABLESPACE "' || ts.tablespace_name || '" DATAFILE ' || CHR(13) || CHR(10)
          || LISTAGG(decode(p.value, NULL, '  ''' || df.file_name || '''')  || ' SIZE '
                -- || df.bytes -- on ne prends pas la taille du datafile, mais la taille ocupée used_bytes
-               -- || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
-               || decode(floor(e.used_bytes/1024/1024),0,10) || 'M ' -- si taille nulle, on retourne 10M
+               || nvl(e.used_bytes,10*1024*1024) -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || decode(floor(df.increment_by*ts.block_size/1024/1024),0,10) || 'M MAXSIZE '
+                     'YES',    ' AUTOEXTEND ON NEXT ' || df.increment_by*ts.block_size || ' MAXSIZE '
                             || CASE
                                   WHEN maxbytes < POWER (1024, 3) * 2
                                   THEN
@@ -45,8 +44,6 @@ SELECT    'CREATE '
          and ts.tablespace_name = df.tablespace_name
 GROUP BY ts.tablespace_name,
          ts.bigfile,
---         ts.logging,
---         ts.status,
          ts.block_size
 ORDER BY ts.tablespace_name;
 
@@ -57,7 +54,7 @@ SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE '
                || nvl(floor(e.used_bytes/1024/1024),10) || 'M ' -- si taille nulle, on retourne 10M
                || DECODE (
                      df.autoextensible,
-                     'YES',    ' AUTOEXTEND ON NEXT ' || floor(df.increment_by*ts.block_size /1024/1024) || 'M MAXSIZE ' 
+                     'YES',    ' AUTOEXTEND ON NEXT ' || df.increment_by*ts.block_size || ' MAXSIZE ' 
                      || FLOOR (maxbytes / POWER (1024, 2)) || 'M'
                         ),
                ',' || CHR (13) || CHR (10))
@@ -72,8 +69,6 @@ SELECT    'CREATE TEMPORARY TABLESPACE "' || ts.tablespace_name || '" TEMPFILE '
          and ts.tablespace_name = df.tablespace_name
 GROUP BY ts.tablespace_name,
          ts.bigfile,
-         ts.logging,
-         ts.status,
          ts.block_size
 ORDER BY ts.tablespace_name;
 
