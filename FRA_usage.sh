@@ -69,17 +69,21 @@ then
 fi
 
 
+echo "-------------------------------------------------------------------------------------------"
 $ORACLE_HOME/bin/sqlplus -s / as sysdba <<EOF
 set lines 150 feedback off pages 0
 select
-'Database: '||v\$database.name||'
-Instance: '||instance_name||'
-Role:     '||database_role from v\$database, v\$instance;
-select 'FRA size: '||round(value/1024/1024/1024)||' GB' from v\$parameter where name='db_recovery_file_dest_size';
-select 'Used:     '||sum(PERCENT_SPACE_USED)||'%  ('||sum(PERCENT_SPACE_RECLAIMABLE)||'% reclaimable)' from v\$flash_recovery_area_usage;
+'Database : '||v\$database.name||'
+ Instance : '||instance_name||'
+ Role     : '||database_role from v\$database, v\$instance;
+
+select 'FRA size : '||round(value/1024/1024/1024)||' GB' from v\$parameter where name='db_recovery_file_dest_size';
+
+select 'Used     : '||sum(PERCENT_SPACE_USED)||'%  ('||sum(PERCENT_SPACE_RECLAIMABLE)||'% reclaimable)' from v\$flash_recovery_area_usage;
+
 set pages 60
 select * from v\$flash_recovery_area_usage;
 exit
 EOF
-echo "-----------------------------------------------------------------------------------------------------"
+echo "-------------------------------------------------------------------------------------------"
 
