@@ -34,7 +34,7 @@ then
 	# echo "THRESHOLD=${THRESHOLD}"
 	# echo "FRA_USED_PERC=${FRA_USED_PERC}"
 	# echo nail -s "Subject: DBPRODNODE: PROD: CLIENT FRA has reached" -S smtp=mail.smtp dbamustak@gmail.com < ${TMPDIR}/chk_${ORACLE_SID}_fra.log
-	echo $(date +%Y.%m.%d-%H:%M:%S) " == On ne fait rien"
+	echo $(date +%Y.%m.%d-%H:%M:%S) " == On ne fait rien : FRA_SIZE=${FRA_SIZE}, FRA_USED=${FRA_USED}, FRA_USED_PERC=${FRA_USED_PERC}"
 else
-	echo $(date +%Y.%m.%d-%H:%M:%S) " == SAUVEGARDE RMAN"
+	echo $(date +%Y.%m.%d-%H:%M:%S) " == SAUVEGARDE RMAN : FRA_SIZE=${FRA_SIZE}, FRA_USED=${FRA_USED}, FRA_USED_PERC=${FRA_USED_PERC}"
 fi 
