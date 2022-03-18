@@ -5,6 +5,8 @@ HOST=$(hostname | awk -F "." '{print $1}')
 DT=$(date)
 export LOGDIR TMPDIR
 
+declare -i FRA_USED_PERC=0
+
 #Set Environment for database
 ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1
 ORACLE_SID=DBSE
