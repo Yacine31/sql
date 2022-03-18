@@ -21,8 +21,8 @@ spool off
 exit
 !
 
-FRA_SIZE=$(tail -1 ${TMPDIR}/${HOST}/chk_${ORACLE_SID}_fra.log | awk "{print $2}")
-FRA_USED=$(tail -1 ${TMPDIR}/${HOST}/chk_${ORACLE_SID}_fra.log | awk "{print $3}")
+FRA_SIZE=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk "{print $2}")
+FRA_USED=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk "{print $3}")
 THRESHOLD=$(echo ${FRA_SIZE} \* 0.1 | bc | awk -F “.” "{print $1}")
 FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk -F "." "{print $1}"))
 
