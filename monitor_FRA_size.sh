@@ -28,5 +28,6 @@ FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk 
 
 if [ ${FRA_USED} -ge ${THRESHOLD} ]
 then
+	# 
 	echo nail -s "Subject: DBPRODNODE: PROD: CLIENT FRA has reached" -S smtp=mail.smtp dbamustak@gmail.com < ${TMPDIR}/${HOST}/chk_${ORACLE_SID}_fra.log
-fi
+fi 
