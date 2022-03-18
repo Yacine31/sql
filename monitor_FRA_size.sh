@@ -21,6 +21,8 @@ spool off
 exit
 !
 
+exit
+
 FRA_SIZE=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $2}')
 FRA_USED=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $3}')
 THRESHOLD=$(echo ${FRA_SIZE} \* 0.1 | bc | awk -F "." '{print $1}')
