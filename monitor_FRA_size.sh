@@ -6,12 +6,13 @@ DT=$(date)
 export LOGDIR TMPDIR
 
 declare -i FRA_USED_PERC=0
+# seuil de 80% d'occupation, on déclenche une action
+declare -i THRESHOLD=80
 
 #Set Environment for database
-ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1
-ORACLE_SID=DBSE
-PATH=${ORACLE_HOME}/bin:${PATH}
-export ORACLE_HOME ORACLE_SID PATH
+export ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1
+export ORACLE_SID=DBSE
+export PATH=${ORACLE_HOME}/bin:${PATH}
 
 sqlplus -s / as sysdba <<!  > /dev/null
 col name for a40
@@ -25,18 +26,10 @@ exit
 
 FRA_SIZE=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $2}')
 FRA_USED=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $3}')
-THRESHOLD=$(echo ${FRA_SIZE} \* 0.9 | bc | awk -F "." '{print $1}')
 FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk -F "." '{print $1}'))
 
-# if [ ${FRA_USED} -ge ${THRESHOLD} ]
-if [ ${FRA_USED_PERC} -lt 80 ]
+if [ ${FRA_USED_PERC} -lt {THRESHOLD} ]
 then
-	# echo 
-	# echo "FRA_SIZE=${FRA_SIZE}"
-	# echo "FRA_USED=${FRA_USED}"
-	# echo "THRESHOLD=${THRESHOLD}"
-	# echo "FRA_USED_PERC=${FRA_USED_PERC}"
-	# echo nail -s "Subject: DBPRODNODE: PROD: CLIENT FRA has reached" -S smtp=mail.smtp dbamustak@gmail.com < ${TMPDIR}/chk_${ORACLE_SID}_fra.log
 	echo $(date +%Y.%m.%d-%H:%M:%S) " == On ne fait rien : FRA_SIZE=${FRA_SIZE}, FRA_USED=${FRA_USED}, FRA_USED_PERC=${FRA_USED_PERC}, THRESHOLD=${THRESHOLD}"
 else
 	echo $(date +%Y.%m.%d-%H:%M:%S) " == SAUVEGARDE RMAN : FRA_SIZE=${FRA_SIZE}, FRA_USED=${FRA_USED}, FRA_USED_PERC=${FRA_USED_PERC}, THRESHOLD=${THRESHOLD}"
