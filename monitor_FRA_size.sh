@@ -28,7 +28,7 @@ FRA_SIZE=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $2}')
 FRA_USED=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $3}')
 FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk -F "." '{print $1}'))
 
-if [ ${FRA_USED_PERC} -lt {THRESHOLD} ]
+if [ ${FRA_USED_PERC} -lt ${THRESHOLD} ]
 then
 	echo $(date +%Y.%m.%d-%H:%M:%S) " == On ne fait rien : FRA_SIZE=${FRA_SIZE}, FRA_USED=${FRA_USED}, FRA_USED_PERC=${FRA_USED_PERC}, THRESHOLD=${THRESHOLD}"
 else
