@@ -29,9 +29,12 @@ FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk 
 if [ ${FRA_USED} -ge ${THRESHOLD} ]
 then
 	# echo 
-	echo "FRA_SIZE=${FRA_SIZE}"
-	echo "FRA_USED=${FRA_USED}"
-	echo "THRESHOLD=${THRESHOLD}"
-	echo "FRA_USED_PERC=${FRA_USED_PERC}"
-	echo nail -s "Subject: DBPRODNODE: PROD: CLIENT FRA has reached" -S smtp=mail.smtp dbamustak@gmail.com < ${TMPDIR}/${HOST}/chk_${ORACLE_SID}_fra.log
+	# echo "FRA_SIZE=${FRA_SIZE}"
+	# echo "FRA_USED=${FRA_USED}"
+	# echo "THRESHOLD=${THRESHOLD}"
+	# echo "FRA_USED_PERC=${FRA_USED_PERC}"
+	# echo nail -s "Subject: DBPRODNODE: PROD: CLIENT FRA has reached" -S smtp=mail.smtp dbamustak@gmail.com < ${TMPDIR}/chk_${ORACLE_SID}_fra.log
+	echo $(date +%Y.%m.%d-%H:%M:%S) " == On ne fait rien"
+else
+	echo $(date +%Y.%m.%d-%H:%M:%S) " == SAUVEGARDE RMAN"
 fi 
