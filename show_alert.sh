@@ -85,14 +85,6 @@ then
         exit 1
 fi
 
-test_instance || { echo "Instance ${ORACLE_SID} non démarrée !!";  exit 1 ; }
-
-# Potionner les variables d'environnement
-export ORACLE_SID
-export ORAENV_ASK=NO
-. oraenv -s >/dev/null
-
-
 # determiner si c'est une instance DB ou ASM
 # si l'instant est ASM alors le sous reprtoire est asm, sinon rdbms
 if [ "$(echo ${ORACLE_SID} | tr A-Z a-z | grep asm)" ]; then
@@ -101,10 +93,25 @@ else
         SUB_DIR="rdbms"
 fi
 
-DIAG_DEST=$(echo "show parameter diagnostic_dest" | sqlplus / as sysdba | grep "^diagnostic_dest" | awk '{print $3}')
-DB_UNIQ_NAME=$(echo "show parameter db_unique_name" | sqlplus / as sysdba | grep "^db_unique_name" | awk '{print $3}')
+# test_instance || { echo "Instance ${ORACLE_SID} non démarrée !!";  exit 1 ; }
+if [ $(test_instance) ] ;
+then
+        # instance démarrée, on lui demande le chemin vers l'alertlog
 
-F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
+        # Potionner les variables d'environnement
+        export ORACLE_SID
+        export ORAENV_ASK=NO
+        . oraenv -s >/dev/null
+
+        DIAG_DEST=$(echo "show parameter diagnostic_dest" | sqlplus / as sysdba | grep "^diagnostic_dest" | awk '{print $3}')
+        DB_UNIQ_NAME=$(echo "show parameter db_unique_name" | sqlplus / as sysdba | grep "^db_unique_name" | awk '{print $3}')
+        F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
+else
+        # la base n'est pas démarrée, on récupère le chemin supposé par défaut 
+        DIAG_DEST=$(adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
+        F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${ORACLE_SID} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
+fi
+
 
 if [ -e "${F_ALERT}" ]
 then
