@@ -14,7 +14,7 @@ export ORACLE_HOME ORACLE_SID PATH
 sqlplus -s / as sysdba <<!
 col name for a40
 set pages 0 lines 150
-set heading off echo off feedback off term off
+set heading off echo off feedback off termout off
 spool ${TMPDIR}/chk_${ORACLE_SID}_fra.log
 select name, space_limit/1024/1024 "Limit(MB)", trunc(SPACE_USED/1024/1024,0) "Used(MB)", SPACE_RECLAIMABLE/1024/1024 "Reclaimable(MB)" from v\$recovery_file_dest;
 spool off
