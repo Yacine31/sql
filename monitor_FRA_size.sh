@@ -29,7 +29,7 @@ THRESHOLD=$(echo ${FRA_SIZE} \* 0.9 | bc | awk -F "." '{print $1}')
 FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk -F "." '{print $1}'))
 
 # if [ ${FRA_USED} -ge ${THRESHOLD} ]
-if [ ${FRA_USED_PERC} -ge 80 ]
+if [ ${FRA_USED_PERC} -lt 80 ]
 then
 	# echo 
 	# echo "FRA_SIZE=${FRA_SIZE}"
