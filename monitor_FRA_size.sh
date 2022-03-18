@@ -26,7 +26,8 @@ FRA_USED=$(tail -1 ${TMPDIR}/chk_${ORACLE_SID}_fra.log | awk '{print $3}')
 THRESHOLD=$(echo ${FRA_SIZE} \* 0.9 | bc | awk -F "." '{print $1}')
 FRA_USED_PERC=$(echo $( echo "scale=2; ${FRA_USED}/${FRA_SIZE} * 100" |bc | awk -F "." '{print $1}'))
 
-if [ ${FRA_USED} -ge ${THRESHOLD} ]
+# if [ ${FRA_USED} -ge ${THRESHOLD} ]
+if [ ${FRA_USED_PERC} -ge 80 ]
 then
 	# echo 
 	# echo "FRA_SIZE=${FRA_SIZE}"
