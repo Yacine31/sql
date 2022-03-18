@@ -11,7 +11,7 @@ ORACLE_SID=DBSE
 PATH=${ORACLE_HOME}/bin:${PATH}
 export ORACLE_HOME ORACLE_SID PATH
 
-sqlplus -s / as sysdba <<!
+sqlplus -s / as sysdba <<!  > /dev/null
 col name for a40
 set pages 0 lines 150
 set heading off echo off feedback off termout off
