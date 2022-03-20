@@ -29,7 +29,7 @@ EOF
 #--------------- Vérifier si l'instance est en cours d'exécution
 test_instance()
 {
-        if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -eq 1 ]; then
+        if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -ne 1 ]; then
                 return 0
         else
                 return 1
