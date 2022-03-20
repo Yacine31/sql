@@ -97,6 +97,7 @@ fi
 if [ $(test_instance) ] ;
 then
         # instance démarrée, on lui demande le chemin vers l'alertlog
+        echo instance démarrée, on lui demande le chemin vers l alertlog
 
         # Potionner les variables d'environnement
         export ORACLE_SID
@@ -107,7 +108,8 @@ then
         DB_UNIQ_NAME=$(echo "show parameter db_unique_name" | sqlplus / as sysdba | grep "^db_unique_name" | awk '{print $3}')
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 else
-        # la base n'est pas démarrée, on récupère le chemin supposé par défaut 
+        # la base n'est pas démarrée, on récupère le chemin par défaut "uniquename/INSTANCE_NAME" 
+        echo "la base n'est pas démarrée, on récupère le chemin par défaut uniquename/INSTANCE_NAME"
         DIAG_DEST=$(adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${ORACLE_SID} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 fi
@@ -115,6 +117,9 @@ fi
 
 if [ -e "${F_ALERT}" ]
 then
+        echo -----------------------------------------------
+        echo fichier alertlog : ${F_ALERT}
+        echo -----------------------------------------------
         show_alert
 else
         echo
