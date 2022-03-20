@@ -94,7 +94,7 @@ else
 fi
 
 # test_instance || { echo "Instance ${ORACLE_SID} non démarrée !!";  exit 1 ; }
-if [ $(test_instance) ] ;
+if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -eq 1 ] ;
 then
         # instance démarrée, on lui demande le chemin vers l'alertlog
         echo instance démarrée, on lui demande le chemin vers l alertlog
