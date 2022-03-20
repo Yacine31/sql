@@ -12,7 +12,9 @@ COL_BLANC=$(tput setaf 7)
 COL_GRIS=$(tput setaf 8)
 GRAS=$(tput bold)
 
+#--------------------------------------------
 #--------------- fonction usage()
+#--------------------------------------------
 usage()
 {
 cat << EOF
@@ -26,17 +28,10 @@ OPTIONS:
 EOF
 }
 
-#--------------- Vérifier si l'instance est en cours d'exécution
-test_instance()
-{
-        if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -ne 1 ]; then
-                return 0
-        else
-                return 1
-        fi
-}
 
+#--------------------------------------------
 #--------------- Fonction d'affichage coloré du fichier alertlog
+#--------------------------------------------
 show_alert()
 {
         echo ${COL_ROUGE}
@@ -58,11 +53,15 @@ show_alert()
 
 }
 
+#--------------------------------------------
 #--------------- MAIN
+#--------------------------------------------
 
 INSTANCE=${ORACLE_SID}
 
+#--------------------------------------------
 # Traitement des paramètres de la ligne de commande
+#--------------------------------------------
 while getopts "hi:abcu" OPTION; do
         case ${OPTION} in
           h)
@@ -85,19 +84,22 @@ then
         exit 1
 fi
 
+#--------------------------------------------
 # determiner si c'est une instance DB ou ASM
 # si l'instant est ASM alors le sous reprtoire est asm, sinon rdbms
+#--------------------------------------------
 if [ "$(echo ${ORACLE_SID} | tr A-Z a-z | grep asm)" ]; then
         SUB_DIR="asm"
 else
         SUB_DIR="rdbms"
 fi
 
-# test_instance || { echo "Instance ${ORACLE_SID} non démarrée !!";  exit 1 ; }
+#--------------------------------------------
+# determiner si l'instance est démarrée ou pas
+#--------------------------------------------
 if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -eq 1 ] ;
 then
         # instance démarrée, on lui demande le chemin vers l'alertlog
-        echo instance démarrée, on lui demande le chemin vers l alertlog
 
         # Potionner les variables d'environnement
         export ORACLE_SID
@@ -109,12 +111,15 @@ then
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 else
         # la base n'est pas démarrée, on récupère le chemin par défaut "uniquename/INSTANCE_NAME" 
-        echo "la base n'est pas démarrée, on récupère le chemin par défaut uniquename/INSTANCE_NAME"
+
         DIAG_DEST=$(adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${ORACLE_SID} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 fi
 
 
+#--------------------------------------------
+# affichage du fichier alertlog
+#--------------------------------------------
 if [ -e "${F_ALERT}" ]
 then
         echo -----------------------------------------------
