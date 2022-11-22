@@ -38,7 +38,7 @@ echo " Base de donnee a traiter: " $r
 export ORACLE_SID=$r
 . oraenv -s
 echo $ORACLE_SID $ORACLE_HOME
-sqlplus -S / as sysdba << EOF > /home/oracle/digora/log/rapport_rman_$r.log
+sqlplus -S / as sysdba << EOF
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set serveroutput on
 set linesize 250 heading off;
@@ -53,7 +53,7 @@ declare
 begin
         select instance_name  into base from v\$instance ;
         select host_name  into serv from v\$instance ;
-        dbms_output.put_line (' Vous trouverez ci dessous le rapport pour la base de donné :' || base || ' sur le serveur : '|| serv );
+        dbms_output.put_line (' Rapport pour la base de donnee :' || base || ' sur le serveur : '|| serv );
 end ;
 /
 select
