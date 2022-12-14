@@ -3,6 +3,7 @@
 # Historique :
 #       14/09/2011 : YOU - Creation
 #       14/10/2015 : YOU - script générique pour toutes les bases
+#       15/12/2022 : YOU - retention de 7 jour, nommage avec nom du jour
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # fonction init : c'est ici qu'il faut modifier toutes les variables liées
@@ -19,7 +20,7 @@ f_init() {
 	export NLS_LANG=AMERICAN_AMERICA.${NLS_CHARACTERSET}
 
 	# répertoire destination de l'export
-	export EXP_LOCATION=/u03/backup/$ORACLE_SID/export_dpump
+	export EXP_LOCATION=/u03/backup/$ORACLE_SID/export
 	# nom du répertoire au niveau de la base de données
 	export DPDIR=EXPDP_DIR
 
@@ -116,4 +117,4 @@ EOF
 #------------------------------------------------------------------------------
 # export des données
 #------------------------------------------------------------------------------
-$ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y directory=$DPDIR dumpfile=export_${ORACLE_SID}_${JOUR_SEMAINE}.dmp logfile=export_${ORACLE_SID}_${JOUR_SEMAINE}.log flashback_time=systimestamp reuse_dumpfiles=yes
+$ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y directory=$DPDIR dumpfile=${ORACLE_SID}_${JOUR_SEMAINE}.dmp logfile=${ORACLE_SID}_${JOUR_SEMAINE}.log flashback_time=systimestamp reuse_dumpfiles=yes

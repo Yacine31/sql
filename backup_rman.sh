@@ -144,7 +144,6 @@ then
 	echo
 	echo "-----------------------------------------------------"
 	echo "Vous devez etre $ORACLE_OWNER pour lancer ce script"
-	echo
 	echo "-----------------------------------------------------"
 	exit 2
 fi
@@ -186,7 +185,6 @@ DELETE NOPROMPT ARCHIVELOG ALL;
 DELETE NOPROMPT OBSOLETE;
 DELETE NOPROMPT EXPIRED BACKUPSET;
 
-# SQL 'ALTER DATABASE BACKUP CONTROLFILE TO TRACE';
 sql \"ALTER DATABASE BACKUP CONTROLFILE TO TRACE as ''${BKP_LOCATION}/controlfile_${ORACLE_SID}.trc'' reuse\";
 SQL \"CREATE PFILE=''${BKP_LOCATION}/pfile_${ORACLE_SID}.ora'' FROM SPFILE\";
 }

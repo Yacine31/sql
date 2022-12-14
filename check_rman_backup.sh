@@ -1,6 +1,6 @@
 #!/bin/bash
 #---------------------------------------------------------------------------
-# 24/01/2019 - YAO Adaptation après migration Crossway vers oda-cw
+# 24/01/2019 - YOU : Premiere version pour liter les backup RMAN de 30j
 #---------------------------------------------------------------------------
 # Environnement Variables
 export NLS_DATE_FORMAT='DD/MM/YYYY HH24:MI:SS'
@@ -34,7 +34,9 @@ test_dba;
 # for r in $(ps -eaf | grep pmon | grep -v grep | cut -d '_' -f3)
 for r in $(ps -eaf | grep pmon | egrep -v 'grep|ASM1|APX1' | cut -d '_' -f3)
 do
+echo "-----------------------------------------------------"
 echo " Base de donnee a traiter: " $r
+echo "-----------------------------------------------------"
 export ORACLE_SID=$r
 . oraenv -s
 echo $ORACLE_SID $ORACLE_HOME
