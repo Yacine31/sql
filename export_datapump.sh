@@ -116,9 +116,4 @@ EOF
 #------------------------------------------------------------------------------
 # export des données
 #------------------------------------------------------------------------------
-$ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y \
-	directory=$DPDIR \ 
-	dumpfile=export_${ORACLE_SID}_${JOUR_SEMAINE}.dmp \
-	logfile=export_${ORACLE_SID}_${JOUR_SEMAINE}.log \
-	flashback_time=systimestamp
-	reuse_dumpfiles=yes
+$ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y directory=$DPDIR dumpfile=export_${ORACLE_SID}_${JOUR_SEMAINE}.dmp logfile=export_${ORACLE_SID}_${JOUR_SEMAINE}.log flashback_time=systimestamp reuse_dumpfiles=yes
