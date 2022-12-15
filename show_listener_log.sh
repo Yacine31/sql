@@ -62,7 +62,7 @@ LISTENER_NAME="LISTENER"
 #--------------------------------------------
 # Traitement des paramètres de la ligne de commande
 #--------------------------------------------
-while getopts "hi:abcu" OPTION; do
+while getopts "hl:abcu" OPTION; do
         case ${OPTION} in
           h)
                 usage
