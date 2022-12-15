@@ -106,7 +106,6 @@ else
         TRC_LOG="${DIAG_DEST}/diag/tnslsnr/${H_NAME}/${LOWER_LISTENER_NAME}/trace/${LOWER_LISTENER_NAME}.log"
 fi
 
-
 #--------------------------------------------
 # affichage du fichier log du listener
 #--------------------------------------------
