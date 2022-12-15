@@ -89,8 +89,8 @@ fi
 #--------------------------------------------
 
 
-LOWER_LISTENER_NAME=$(echo {LISTENER_NAME} | tr 'A-Z' 'a-z')
-UPPER_LISTENER_NAME=$(echo {LISTENER_NAME} | tr 'a-z' 'A-Z')
+LOWER_LISTENER_NAME=$(echo ${LISTENER_NAME} | tr 'A-Z' 'a-z')
+UPPER_LISTENER_NAME=$(echo ${LISTENER_NAME} | tr 'a-z' 'A-Z')
 
 # determiner si le listener est démarrée ou pas
 
