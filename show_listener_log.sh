@@ -44,7 +44,7 @@ show_alert()
         tail -20f ${TRC_LOG} | sed -E \
                 -e "s,^($(date +'%a %b')).*,${COL_JAUNE}&${COL_NORMAL},g" \
                 -e "s,^($(date +'%Y-%m-%d')).*,${COL_JAUNE}&${COL_NORMAL},g" \
-                -e "s,.*[1-9999]$,${GRAS}${COL_BLEU}&${COL_NORMAL},g" \
+                -e "s,.*[1-99999]$,${GRAS}${COL_BLEU}&${COL_NORMAL},g" \
                 -e "s,.*WARNING.*,${COL_VIOLET}&${COL_NORMAL},g" \
                 -e "s,.*(ERROR:|ORA-|TNS-).*,${GRAS}${COL_ROUGE}&${COL_NORMAL},g" \
                 -e "s,^(ARC|RFS|LNS|MRP).*,${COL_BLUE}&${COL_NORMAL},g" \
