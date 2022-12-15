@@ -98,7 +98,7 @@ if [ $(ps -ef | grep "tnslsnr ${UPPER_LISTENER_NAME}" | grep -v grep | wc -l) -e
 then
         # listener démarré, on lui demande le chemin vers le fichier log
         TRC_DIR=$(lsnrctl show trc_directory ${UPPER_LISTENER_NAME} | grep "^LISTENER parameter" | cut -d' ' -f6)
-        TRC_LOG=${TRC_DIR}/lsnr_1522.log
+        TRC_LOG=${TRC_DIR}/${LOWER_LISTENER_NAME}.log
 else
         # le listener n'est pas démarré, on récupère le chemin par défaut 
         DIAG_DEST=$(adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
