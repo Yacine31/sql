@@ -48,7 +48,7 @@ show_alert()
                 -e "s,.*WARNING.*,${COL_VIOLET}&${COL_NORMAL},g" \
                 -e "s,.*(ERROR:|ORA-|TNS-).*,${GRAS}${COL_ROUGE}&${COL_NORMAL},g" \
                 -e "s,^(ARC|RFS|LNS|MRP).*,${COL_BLUE}&${COL_NORMAL},g" \
-                -e "s,.*(Online Redo|online redo|Current log).*,${COL_CYAN}&${COL_NORMAL},g" \
+                -e "s,.*(stop|start|Start).*,${COL_CYAN}&${COL_NORMAL},g" \
                 -e "s,.*,${COL_NORMAL}&${COL_NORMAL},"
 
 }
