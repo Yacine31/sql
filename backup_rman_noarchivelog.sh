@@ -24,16 +24,14 @@ f_init() {
 	export BKP_LOCATION=/u03/backup/${ORACLE_SID}/backup_rman
 
 	# nombre de canaux de sauvegarde en parallel
-	export BKP_PARALLELISM=1
+	export BKP_PARALLELISM=3
 	# nombre de sauvegarde RMAN en ligne a garder
-	export BKP_REDUNDANCY=1
+	export BKP_REDUNDANCY=2
 	export DATE_JOUR=$(date +%Y%m%d-%H%M)
-	export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_${ORACLE_SID}_${BKP_TYPE}_${DATE_JOUR}.log
-	export RMAN_CMD_FILE=${SCRIPTS_DIR}/rman_cmdfile_${ORACLE_SID}_${BKP_TYPE}.rman
+	export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_${ORACLE_SID}_${DATE_JOUR}.log
+	export RMAN_CMD_FILE=${SCRIPTS_DIR}/rman_cmdfile_${ORACLE_SID}.rman
 	# nombre de jours de conservation des logs de la sauvegarde
 	export BKP_LOG_RETENTION=15
-	# nombre de jours de conservation des archivelog sur disque
-	export ARCHIVELOG_RETENTION=2
 
 } # f_init
 
@@ -143,6 +141,7 @@ STARTUP MOUNT;
 BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/data_%T_%t_%s_%p' TAG 'DATA_${DATE_JOUR}' as compressed backupset database;
 BACKUP CURRENT CONTROLFILE FORMAT '${BKP_LOCATION}/control_%T_%t_%s_%p' TAG 'CTLFILE_${DATE_JOUR}';
 BACKUP SPFILE INCLUDE CURRENT CONTROLFILE FORMAT '${BKP_LOCATION}/spfile_ctrlfile_%T_%t_%s_%p' TAG 'SPFILE_CTRLFILE_${DATE_JOUR}';
+ALTER DATABASE OPEN;
 
 CROSSCHECK BACKUPSET;
 DELETE NOPROMPT OBSOLETE;
@@ -160,6 +159,6 @@ ${ORACLE_HOME}/bin/rman target / cmdfile=${RMAN_CMD_FILE} log=${BKP_LOG_FILE}
 
 # Nettoyage auto des logs : duree de concervation determinee par la variable : ${BKP_LOG_RETENTION}
 f_print "------------------------- NETTOYAGE DES LOGS -------------------------"
-find ${BKP_LOG_DIR} -type f -iname "backup_rman_${BKP_TYPE}*.log" -mtime +${BKP_LOG_RETENTION} -exec rm -fv "{}" \; >> $BKP_LOG_FILE
+find ${BKP_LOG_DIR} -type f -iname "backup_rman_${ORACLE_SID}*.log" -mtime +${BKP_LOG_RETENTION} -exec rm -fv "{}" \; >> $BKP_LOG_FILE
 
-f_print "------------------------- BACKUP ${BKP_TYPE} TERMINE -------------------------"
+f_print "------------------------- BACKUP ${ORACLE_SID} TERMINE -------------------------"
