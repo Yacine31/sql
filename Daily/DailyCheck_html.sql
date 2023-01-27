@@ -16,7 +16,7 @@ TABLE "WIDTH='90%' BORDER='1'"
 -- prompt <h2>Current DATE</h2>
 -- ---------------------------------------------------
 set head off
-select "<h2>Current DATE</h2> " || to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') from dual;
+select '<h2>Current DATE</h2> ' || to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') from dual;
 set head on
 
 -- ---------------------------------------------------
