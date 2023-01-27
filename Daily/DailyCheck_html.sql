@@ -1,8 +1,8 @@
 set echo off 
-set feedback off
-set serveroutput off
-set termout off
-set pagesize 1000 
+-- set feedback off
+-- set serveroutput off
+-- set termout off
+-- set pagesize 1000 
 set markup html on
 
 -- ---------------------------------------------------
