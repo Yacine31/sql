@@ -1,8 +1,13 @@
-SET TERMOUT OFF
-SET ECHO OFF
-SET SERVEROUTPUT OFF
-set feedback off
-set echo off pagesize 1000 markup html on ENTMAP OFF spool on TABLE BORDER='1'
+-- SET TERMOUT OFF
+-- SET ECHO OFF
+-- SET SERVEROUTPUT OFF
+-- set feedback off
+-- set echo off 
+-- set pagesize 1000 
+set markup html on 
+-- set ENTMAP OFF 
+-- set spool on 
+-- set TABLE BORDER='1'
 
 -- ---------------------------------------------------
 prompt 1 - Current DATE
