@@ -1,9 +1,10 @@
 set echo off 
--- set feedback off
+set feedback off
 -- set serveroutput off
 -- set termout off
 -- set pagesize 1000 
-set markup html on
+-- set markup html on
+SET MARKUP HTML ON SPOOL ON PREFORMAT OFF ENTMAP ON -
 
 -- ---------------------------------------------------
 prompt <h1>Current DATE</h1>
