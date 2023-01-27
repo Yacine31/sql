@@ -3,12 +3,13 @@ SET ECHO OFF
 SET SERVEROUTPUT OFF
 set feedback off
 set echo off pagesize 1000 markup html on ENTMAP OFF spool on TABLE BORDER='1'
--- spool ./DailyCheck.html
 
 -- ---------------------------------------------------
 prompt 1 - Current DATE
 -- ---------------------------------------------------
 select to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') "CURRENT DATE" from dual;
+
+exit
 
 -- ---------------------------------------------------
 prompt 2 - DB SIZE
