@@ -4,17 +4,13 @@
 -- set feedback off
 -- set echo off 
 --set pagesize 1000 
-set markup html on 
--- set ENTMAP OFF 
+set markup html on
 -- set spool on 
-set TABLE BORDER='1'
 
 -- ---------------------------------------------------
 prompt 1 - Current DATE
 -- ---------------------------------------------------
 select to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') "CURRENT DATE" from dual;
-
-exit
 
 -- ---------------------------------------------------
 prompt 2 - DB SIZE
