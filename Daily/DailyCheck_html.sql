@@ -13,10 +13,10 @@ BODY "TEXT='#FF00Ff'" -
 TABLE "WIDTH='90%' BORDER='1'"
 
 -- ---------------------------------------------------
--- prompt <h2>Current DATE</h2>
+prompt <h2>Current DATE</h2>
 -- ---------------------------------------------------
 set head off
-select '<h2>Current DATE</h2> ' || to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') from dual;
+select to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') "Current Date" from dual;
 set head on
 
 -- ---------------------------------------------------
@@ -101,7 +101,7 @@ SELECT * FROM V$FLASH_RECOVERY_AREA_USAGE;
 -- ---------------------------------------------------
 prompt <h2>Invalid objects</h2>
 -- ---------------------------------------------------
-select owner,OBJECT_NAME, status FROM dba_objects WHERE status = 'INVALID';
+select owner,OBJECT_NAME, status FROM dba_objects WHERE status <> 'VALID';
 prompt
 
 
@@ -183,7 +183,7 @@ WHERE b.start_time > (SYSDATE - 30)
 ORDER BY b.start_time asc;
 
 -- ---------------------------------------------------
-prompt <h2>Production Alert Log Error</h2>
+prompt <h2>Last Alert Log Error</h2>
 -- ---------------------------------------------------
 set pages 999 lines 150
 select to_char(ORIGINATING_TIMESTAMP, 'DD-MM-YYYY HH-MM-SS') || ' : ' || message_text "Last alertlog (30 days)"
@@ -191,7 +191,7 @@ FROM X$DBGALERTEXT
 WHERE originating_timestamp > systimestamp - 30  AND regexp_like(message_text, '(ORA-)');
 
 -- ---------------------------------------------------
-prompt <h2>Current sequence no in Production</h2>
+prompt <h2>Current sequence no in</h2>
 -- ---------------------------------------------------
 
 COL MEMBER FORMAT A90 WRAPPED
