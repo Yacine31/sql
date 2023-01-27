@@ -1,25 +1,23 @@
--- SET TERMOUT OFF
--- SET ECHO OFF
--- SET SERVEROUTPUT OFF
--- set feedback off
--- set echo off 
---set pagesize 1000 
+set echo off 
+set feedback off
+set serveroutput off
+set termout off
+set pagesize 1000 
 set markup html on
--- set spool on 
 
 -- ---------------------------------------------------
-prompt 1 - Current DATE
+prompt <h1>Current DATE</h1>
 -- ---------------------------------------------------
 select to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') "CURRENT DATE" from dual;
 
 -- ---------------------------------------------------
-prompt 2 - DB SIZE
+prompt <h1>DB SIZE</h1>
 -- ---------------------------------------------------
 col TOTAL_SIZE_GB format 99,999.99
 select sum(bytes)/1024/1024/1024 TOTAL_SIZE_GB from dba_data_files;
 
 -- ---------------------------------------------------
-prompt 3 - INSTANCE STATUS
+prompt <h1>3 - INSTANCE STATUS</h1>
 -- ---------------------------------------------------
 select inst_id,
  instance_name,
@@ -34,12 +32,12 @@ select inst_id,
 FROM  gv$instance;
 
 -- ---------------------------------------------------
-prompt 4 - Database Status 
+prompt <h1>4 - Database Status </h1>
 -- ---------------------------------------------------
 SELECT inst_id, name, to_char(CREATED ,'DD/MM/YYYY') CREATED , open_mode, DATABASE_ROLE, log_mode, FORCE_LOGGING, CURRENT_SCN FROM gv$database;
 
 -- ---------------------------------------------------
-prompt 5 - Database non default parameters
+prompt <h1>5 - Database non default parameters</h1>
 -- ---------------------------------------------------
 set pages 999 lines 150
 col name for a50
@@ -48,7 +46,7 @@ col display_value for a90
 select NAME, DISPLAY_VALUE from v$parameter where ISDEFAULT='FALSE' order by name;
 
 -- ---------------------------------------------------
-prompt 6 - Users
+prompt <h1>6 - Users</h1>
 -- ---------------------------------------------------
 set pages 999 lines 150
 ALTER SESSION SET NLS_DATE_FORMAT ='YYYY/MM/DD HH24:MI';
@@ -60,14 +58,14 @@ col ACCOUNT_STATUS for a20
 select USERNAME, ACCOUNT_STATUS, PROFILE, DEFAULT_TABLESPACE DEF_TBS, TEMPORARY_TABLESPACE TMP_TBS, CREATED, PASSWORD_VERSIONS from dba_users order by created;
 
 -- ---------------------------------------------------
-prompt 6 - NLS Database parameters
+prompt <h1>6 - NLS Database parameters</h1>
 -- ---------------------------------------------------
 col parameter for a30
 col value for a30
 select * from nls_database_parameters ;
 
 -- ---------------------------------------------------
-prompt 8 - FRA
+prompt <h1>8 - FRA</h1>
 -- ---------------------------------------------------
 set lines 300
 SELECT VALUE/1024/1024 TAILLE_FRA_MiB, ROUND((VALUE*TOT_PCT/100)/1024/1024,0) ESPACE_UTILISE_MiB, 
@@ -80,7 +78,7 @@ WHERE NAME='db_recovery_file_dest_size';
 SELECT * FROM V$FLASH_RECOVERY_AREA_USAGE; 
 
 -- ---------------------------------------------------
-prompt 8 - INVALID OBJECTS DETAILS
+prompt <h1>8 - INVALID OBJECTS DETAILS</h1>
 -- ---------------------------------------------------
 col owner format a20
 col object_name format a50
@@ -89,7 +87,7 @@ select owner,OBJECT_NAME, status FROM dba_objects WHERE status = 'INVALID';
 
 
 -- ---------------------------------------------------
-prompt 11 - TABLE SPACE Details and DB Size
+prompt <h1>11 - TABLE SPACE Details and DB Size</h1>
 -- ---------------------------------------------------
 
 SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) TAILLE_GIB FROM
@@ -145,7 +143,7 @@ CLEAR COL
 /
 
 -- ---------------------------------------------------
-prompt 12 - TEMP TABLESPACE UTILIZATION
+prompt <h1>12 - TEMP TABLESPACE UTILIZATION</h1>
 -- ---------------------------------------------------
 SELECT A.tablespace_name tablespace, D.mb_total,SUM (A.used_blocks * D.block_size) / 1024 / 1024 mb_used,
 D.mb_total - SUM (A.used_blocks * D.block_size) / 1024 / 1024 mb_free
@@ -158,7 +156,7 @@ WHERE B.ts#= C.ts# GROUP BY B.name, C.block_size
 WHERE A.tablespace_name = D.name        GROUP by A.tablespace_name, D.mb_total;
 
 -- ---------------------------------------------------
-prompt 13 - LAST RMAN BACKUP STATUS
+prompt <h1>13 - LAST RMAN BACKUP STATUS</h1>
 -- ---------------------------------------------------
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set serveroutput on
@@ -190,7 +188,7 @@ WHERE b.start_time > (SYSDATE - 30)
 ORDER BY b.start_time asc;
 
 -- ---------------------------------------------------
-prompt 14 - Production Alert Log Error
+prompt <h1>14 - Production Alert Log Error</h1>
 -- ---------------------------------------------------
 set pages 999 lines 150
 select to_char(ORIGINATING_TIMESTAMP, 'DD-MM-YYYY HH-MM-SS') || ' : ' || message_text "Last alertlog (30 days)"
@@ -198,7 +196,7 @@ FROM X$DBGALERTEXT
 WHERE originating_timestamp > systimestamp - 30  AND regexp_like(message_text, '(ORA-)');
 
 -- ---------------------------------------------------
-prompt 15 - Current sequence no in Production
+prompt <h1>15 - Current sequence no in Production</h1>
 -- ---------------------------------------------------
 
 COL MEMBER FORMAT A90 WRAPPED
@@ -213,7 +211,7 @@ WHERE G.GROUP#=F.GROUP#
 ORDER BY 1,3,4,2;
 
 -- ---------------------------------------------------
-prompt 18 - Archive generated for the past 30 days
+prompt <h1>18 - Archive generated for the past 30 days</h1>
 -- ---------------------------------------------------
 set head off
 select max('Taille des fichiers redolog (Mo) : ' || bytes/1024/1024) from v$log;
@@ -281,7 +279,7 @@ group by to_char(first_time, 'YYYY/MM/dd')
 order by to_char(first_time, 'YYYY/MM/dd')
 ;
 
-prompt Taille des redolog par jour 
+prompt <h1>Taille des redolog par jour </h1>
 select
         to_char(first_time, 'YYYY/MM/dd') "Jour",
     count(*) "Nbr de fichiers",
