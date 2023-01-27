@@ -13,13 +13,16 @@ BODY "TEXT='#FF00Ff'" -
 TABLE "WIDTH='90%' BORDER='1'"
 
 -- ---------------------------------------------------
-prompt <h2>Current DATE</h2>
+-- prompt <h2>Current DATE</h2>
 -- ---------------------------------------------------
-select to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') "CURRENT DATE" from dual;
+set head off
+select "<h2>Current DATE</h2> " || to_char(sysdate,'DD/MM/YYYY HH24:MI:SS') from dual;
+set head on
 
 -- ---------------------------------------------------
-prompt <h2>DB SIZE</h2>
+prompt <h2>Database Size</h2>
 -- ---------------------------------------------------
+set head off
 col TOTAL_SIZE_GB format 99,999.99
 SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) TOTAL_SIZE_GB FROM
 (
@@ -33,6 +36,7 @@ SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) TOTAL_SIZE_GB FROM
     UNION ALL
     SELECT BYTES FROM V$STANDBY_LOG SL, V$LOGFILE LF WHERE SL.GROUP# = LF.GROUP#
 );
+set head on
 
 -- ---------------------------------------------------
 prompt <h2>INSTANCE STATUS</h2>
@@ -165,20 +169,12 @@ column status format a25;
 column input_bytes_display format a12;
 column output_bytes_display format a12;
 column device_type format a10;
-declare
-        base varchar2(40) ;
-        serv varchar2(40) ;
-begin
-        select instance_name  into base from v$instance ;
-        select host_name  into serv from v$instance ;
-        dbms_output.put_line (' Rapport pour la base de donnee :' || base || ' sur le serveur : '|| serv );
-end ;
-/
+
 select
         b.input_type,
         b.status,
-        to_char(b.start_time,'DD-MM-YY HH24:MI') "Start Time",
-        to_char(b.end_time,'DD-MM-YY HH24:MI') "End Time",
+        to_char(b.start_time,'DD-MM-YYYY HH24:MI') "Start Time",
+        to_char(b.end_time,'DD-MM-YYYY HH24:MI') "End Time",
         b.output_device_type device_type,
         b.input_bytes_display,
         b.output_bytes_display
