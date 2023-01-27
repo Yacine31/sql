@@ -141,8 +141,6 @@ FROM
 )
 GROUP BY TABLESPACE_NAME
 ORDER BY TABLESPACE_NAME;
-CLEAR COL
-/
 
 -- ---------------------------------------------------
 prompt <h2>TEMP Tablespace</h2>
