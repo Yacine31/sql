@@ -5,5 +5,5 @@ do
         export ORAENV_ASK=NO
         export ORACLE_SID=$r
         . oraenv -s > /dev/null
-        sqlplus -s "/ as sysdba" @DailyCheck_html.sql > DailyCheck_$r_${DATETIME}.html
+        sqlplus -s "/ as sysdba" @DailyCheck_html.sql > DailyCheck_${ORACLE_SID}_${DATETIME}.html
 done

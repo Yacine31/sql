@@ -56,6 +56,13 @@ prompt <h2>Database Status </h2>
 SELECT inst_id, name, to_char(CREATED ,'DD/MM/YYYY') CREATED , open_mode, DATABASE_ROLE, log_mode, FORCE_LOGGING, CURRENT_SCN FROM gv$database;
 
 -- ---------------------------------------------------
+prompt <h2>Disk Status</h2>
+-- ---------------------------------------------------
+host df -h
+prompt <br>
+host free -h
+
+-- ---------------------------------------------------
 prompt <h2>Database non default parameters</h2>
 -- ---------------------------------------------------
 set pages 999 lines 150
