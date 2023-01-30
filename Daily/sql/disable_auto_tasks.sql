@@ -38,7 +38,9 @@ END;
  
 select client_name, status,attributes,service_name from dba_autotask_client
 /
- 
+
+exit 
+
 -- pour réactiver les auto task remplacer DBMS_AUTO_TASK_ADMIN.disable par DBMS_AUTO_TASK_ADMIN.enable
 
 -- BEGIN

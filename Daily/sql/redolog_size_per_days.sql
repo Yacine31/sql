@@ -10,3 +10,4 @@ from v$archived_log
 group by to_char(first_time, 'YYYY/MM/dd')
 order by to_char(first_time, 'YYYY/MM/dd')
 ;
+exit

@@ -44,4 +44,6 @@ v$parameter
 where
 name = 'open_cursors'
 )
-/ 
+;
+
+exit

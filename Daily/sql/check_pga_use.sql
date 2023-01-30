@@ -10,4 +10,4 @@ FROM v$process p,v$session s
 WHERE s.paddr ( + ) = p.addr
 -- AND p.background IS NULL      -- comment if need to monitor background processes
 ORDER BY p.pga_alloc_mem DESC;
-
+exit

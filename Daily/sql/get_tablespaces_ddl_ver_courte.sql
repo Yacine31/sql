@@ -1,5 +1,3 @@
-set head off pages 0 feedback off lines 200
-
 select '------- HOSTNAME : '||host_name||', DB_NAME : '||name||', VERSION : '||version || ' -------' from v$database,v$instance;
 select '------- Datafiles -------' from dual;
 SELECT 'CREATE '
