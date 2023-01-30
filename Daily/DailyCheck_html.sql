@@ -5,10 +5,14 @@ set feedback off
 -- set pagesize 1000 
 -- set markup html on
 SET MARKUP HTML ON SPOOL ON PREFORMAT OFF ENTMAP OFF -
-HEAD "<TITLE>Database Report</TITLE> -
-<STYLE type='text/css'> -
-<!-- BODY {background: #FFFFC6} --> -
-</STYLE>" -
+HEAD "
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="generator" content="SQL*Plus 19.18.0">
+<style type='text/css'> body {font:10pt Arial,Helvetica,sans-serif; color:black; background:White;} p {font:10pt Arial,Helvetica,sans-serif; color:black; background:White;} table,tr,td {font:10pt Arial,Helvetica,sans-serif; color:Black; background:#f7f7e7; padding:0px 0px 0px 0px; margin:0px 0px 0px 0px;} th {font:bold 10pt Arial,Helvetica,sans-serif; color:#336699; background:#cccc99; padding:0px 0px 0px 0px;} h1 {font:16pt Arial,Helvetica,Geneva,sans-serif; color:#336699; background-color:White; border-bottom:1px solid #cccc99; margin-top:0pt; margin-bottom:0pt; padding:0px 0px 0px 0px;-
+} h2 {font:bold 10pt Arial,Helvetica,Geneva,sans-serif; color:#336699; background-color:White; margin-top:4pt; margin-bottom:0pt;} a {font:9pt Arial,Helvetica,sans-serif; color:#663300; background:#ffffff; margin-top:0pt; margin-bottom:0pt; vertical-align:top;}
+</style>
+<title>SQL*Plus Report</title>
+" -
 BODY "TEXT='#FF00Ff'" -
 TABLE "WIDTH='90%' BORDER='1'"
 
