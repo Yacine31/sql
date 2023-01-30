@@ -24,7 +24,8 @@ do
         # sqlplus -s "/ as sysdba" @rapport_html.sql >> ${HTML_FILE}
         for f in sql/*.sql
         do
-                sqlplus -s "/ as sysdba" @$f >> ${HTML_FILE}
+                # sqlplus -s "/ as sysdba" @$f >> ${HTML_FILE}
+                sed '1 s/^/SET MARKUP HTML ON SPOOL ON PREFORMAT OFF ENTMAP OFF\n/' $f | sqlplus / as sysdba
         done
 
         sed -i 's/<table.*>$/<table class="table table-striped">/g' ${HTML_FILE}
