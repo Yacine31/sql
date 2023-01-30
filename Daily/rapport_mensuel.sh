@@ -24,7 +24,7 @@ do
         # sqlplus -s "/ as sysdba" @rapport_html.sql >> ${HTML_FILE}
         for f in sql/*.sql
         do
-                sqlplus -s "/ as sysdba" @sql/$f >> ${HTML_FILE}
+                sqlplus -s "/ as sysdba" @$f >> ${HTML_FILE}
         done
 
         sed -i 's/<table.*>$/<table class="table table-striped">/g' ${HTML_FILE}
