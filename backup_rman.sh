@@ -20,7 +20,7 @@ f_init() {
 	# les differents repertoires
 	export SCRIPTS_DIR=/home/oracle/scripts
 	export BKP_LOG_DIR=$SCRIPTS_DIR/logs
-	export BKP_LOCATION=/u02/backup/${ORACLE_SID}/backup_rman
+	export BKP_LOCATION=/u04/backup/${ORACLE_SID}/backup_rman
 
 	# nombre de sauvegarde RMAN en ligne a garder
 	export BKP_REDUNDANCY=2
@@ -30,7 +30,7 @@ f_init() {
 	# nombre de jours de conservation des logs de la sauvegarde
 	export BKP_LOG_RETENTION=15
 	# nombre de jours de conservation des archivelog sur disque
-	export ARCHIVELOG_RETENTION=2
+	export ARCHIVELOG_RETENTION=0
 
 } # f_init
 
