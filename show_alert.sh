@@ -95,6 +95,18 @@ else
 fi
 
 #--------------------------------------------
+# determiner si l'instance est dans /etc/oratab
+#--------------------------------------------
+if [ $(cat /etc/oratab | grep "^${ORACLE_SID}:" | grep -v grep | wc -l) -eq 0 ] ;
+then
+        # pas d'entrée dans /etc/oratab
+        echo "-----"
+        echo "----- Pas d'entrée dans le fichier /etc/oratab"
+        echo "-----"
+        exit 1
+fi
+
+#--------------------------------------------
 # determiner si l'instance est démarrée ou pas
 #--------------------------------------------
 if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -eq 1 ] ;
@@ -112,7 +124,7 @@ then
 else
         # la base n'est pas démarrée, on récupère le chemin par défaut "uniquename/INSTANCE_NAME" 
 
-        DIAG_DEST=$(adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
+        DIAG_DEST=$($ORACLE_HOME/bin/adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${ORACLE_SID} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 fi
 
@@ -125,7 +137,9 @@ then
         show_alert
 else
         echo
-        echo "le fichier : ${COL_ROUGE}${GRAS_ARR_PLAN}${F_ALERT}${COL_NORMAL} est introuvable !!"
+        echo "-----"
+        echo "----- le fichier : ${COL_ROUGE}${GRAS_ARR_PLAN}${F_ALERT}${COL_NORMAL} est introuvable !!"
+        echo "-----"
         echo
         exit 1
 echo
