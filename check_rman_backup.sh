@@ -37,11 +37,10 @@ echo " Base de donnee a traiter: " $r
 echo "-----------------------------------------------------"
 export ORACLE_SID=$r
 . oraenv -s > /dev/null
-# echo $ORACLE_SID $ORACLE_HOME
 sqlplus -S / as sysdba << EOF
-alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
-set serveroutput on
+set head off pages 0 feedback off 
 set linesize 250 heading off;
+alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set heading on pagesize 999;
 column status format a25;
 column input_bytes_display format a12;
@@ -59,8 +58,8 @@ end ;
 select
         b.input_type,
         b.status,
-        to_char(b.start_time,'DD-MM-YY HH24:MI') "Start Time",
-        to_char(b.end_time,'DD-MM-YY HH24:MI') "End Time",
+        to_char(b.start_time,'DD-MM-YYYY HH24:MI') "Start Time",
+        to_char(b.end_time,'DD-MM-YYYY HH24:MI') "End Time",
         b.output_device_type device_type,
         b.input_bytes_display,
         b.output_bytes_display
