@@ -14,23 +14,23 @@
 #------------------------------------------------------------------------------
 f_init() {
 
-	export ORACLE_OWNER=oracle
-	export NLS_DATE_FORMAT="YYYY/MM/DD HH24:MI:SS"
+        export ORACLE_OWNER=oracle
+        export NLS_DATE_FORMAT="YYYY/MM/DD HH24:MI:SS"
 
-	# les differents repertoires
-	export SCRIPTS_DIR=/home/oracle/scripts
-	export BKP_LOG_DIR=$SCRIPTS_DIR/logs
-	export BKP_LOCATION=/u04/backup/${ORACLE_SID}/backup_rman
+        # les differents repertoires
+        export SCRIPTS_DIR=/home/oracle/scripts
+        export BKP_LOG_DIR=$SCRIPTS_DIR/logs
+        export BKP_LOCATION=/u04/backup/${ORACLE_SID}
 
-	# nombre de sauvegarde RMAN en ligne a garder
-	export BKP_REDUNDANCY=2
-	export DATE_JOUR=$(date +%Y%m%d-%H%M)
-	export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_${ORACLE_SID}_${BKP_TYPE}_${DATE_JOUR}.log
-	export RMAN_CMD_FILE=${SCRIPTS_DIR}/rman_cmdfile_${ORACLE_SID}_${BKP_TYPE}.rman
-	# nombre de jours de conservation des logs de la sauvegarde
-	export BKP_LOG_RETENTION=15
-	# nombre de jours de conservation des archivelog sur disque
-	export ARCHIVELOG_RETENTION=0
+        # nombre de sauvegarde RMAN en ligne a garder
+        export BKP_REDUNDANCY=2
+        export DATE_JOUR=$(date +%Y%m%d-%H%M)
+        export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_${ORACLE_SID}_${BKP_TYPE}_${DATE_JOUR}.log
+        export RMAN_CMD_FILE=${SCRIPTS_DIR}/rman_cmdfile_${ORACLE_SID}_${BKP_TYPE}.rman
+        # nombre de jours de conservation des logs de la sauvegarde
+        export BKP_LOG_RETENTION=15
+        # nombre de jours de conservation des archivelog sur disque
+        export ARCHIVELOG_RETENTION=1
 
 } # f_init
 
@@ -45,8 +45,8 @@ syntax : $O -s ORACLE_SID -t DB|AL
 -s ORACLE_SID
 
 -t
-	-t DB => backup full (database + archivelog)
-	-t AL => backup des archivelog seulement
+        -t DB => backup full (database + archivelog)
+        -t AL => backup des archivelog seulement
 
 CATEOF
 exit $1
@@ -58,20 +58,20 @@ exit $1
 #------------------------------------------------------------------------------
 f_is_running() {
 
-	RUNNING_BKP=$($ORACLE_HOME/bin/sqlplus -s / as sysdba <<EOF
-	-- set echo off heading off
-	-- select distinct status from v\$rman_status where status like 'RUNNING%';
-	SET ECHO OFF NEWP 0 SPA 0 PAGES 0 FEED OFF HEAD OFF TRIMS ON lines 132
-	SELECT COUNT(*) FROM V\$RMAN_STATUS WHERE SUBSTR(STATUS,1,7)='RUNNING';
-	exit
+        RUNNING_BKP=$($ORACLE_HOME/bin/sqlplus -s / as sysdba <<EOF
+        -- set echo off heading off
+        -- select distinct status from v\$rman_status where status like 'RUNNING%';
+        SET ECHO OFF NEWP 0 SPA 0 PAGES 0 FEED OFF HEAD OFF TRIMS ON lines 132
+        SELECT COUNT(*) FROM V\$RMAN_STATUS WHERE SUBSTR(STATUS,1,7)='RUNNING';
+        exit
 EOF
-) 
+)
 
-	if [[ "$RUNNING_BKP" -ne 0 ]]; then
-		f_print "Backup RMAN en cours ... on quitte"
-		echo "Backup RMAN en cours ... on quitte"
-		exit $1
-	fi
+        if [[ "$RUNNING_BKP" -ne 0 ]]; then
+                f_print "Backup RMAN en cours ... on quitte"
+                echo "Backup RMAN en cours ... on quitte"
+                exit $1
+        fi
 
 } #f_help
 
@@ -89,11 +89,11 @@ f_print()
 f_options() {
 
         case ${BKP_TYPE} in
-        [dD][bB]) 
-			BKP_DB_PLUS_AL=TRUE;
+        [dD][bB])
+                        BKP_DB_PLUS_AL=TRUE;
         ;;
         [aA][lL])
-			BKP_DB_PLUS_AL=FALSE;
+                        BKP_DB_PLUS_AL=FALSE;
         ;;
         *) f_help 2;
         ;;
@@ -141,11 +141,11 @@ f_init
 # si ce n'est pas le user oracle qui lance le script, on quitte
 if (test `whoami` != $ORACLE_OWNER)
 then
-	echo
-	echo "-----------------------------------------------------"
-	echo "Vous devez etre $ORACLE_OWNER pour lancer ce script"
-	echo "-----------------------------------------------------"
-	exit 2
+        echo
+        echo "-----------------------------------------------------"
+        echo "Vous devez etre $ORACLE_OWNER pour lancer ce script"
+        echo "-----------------------------------------------------"
+        exit 2
 fi
 
 # initialisation des chemins, s'ils n'existent pas ils seront crees par la commande install
