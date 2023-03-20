@@ -13,8 +13,7 @@ unset NLS_LANG
 function test_dba {
 if test "$(id|grep dba)"
   then
-    #return 0
-    echo " OK =>  Test Utilisateur DBA"
+    return 0
   else
     echo ""
     echo "============================================================="
@@ -31,15 +30,14 @@ test_dba;
 # reporter toutes les instances préntes sur ce serveur
 #---------------------------------------------------------------------------
 
-# for r in $(ps -eaf | grep pmon | grep -v grep | cut -d '_' -f3)
 for r in $(ps -eaf | grep pmon | egrep -v 'grep|ASM1|APX1' | cut -d '_' -f3)
 do
 echo "-----------------------------------------------------"
 echo " Base de donnee a traiter: " $r
 echo "-----------------------------------------------------"
 export ORACLE_SID=$r
-. oraenv -s
-echo $ORACLE_SID $ORACLE_HOME
+. oraenv -s > /dev/null
+# echo $ORACLE_SID $ORACLE_HOME
 sqlplus -S / as sysdba << EOF
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set serveroutput on
