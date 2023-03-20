@@ -6,6 +6,7 @@
 #       14/09/2011 : YAO - Creation
 #       13/10/2015 : YAO - ajout des params en ligne de commande
 #       24/10/2017 : YAO - ajout de level 0 + stby ctlfile + spfile including ctrl file
+#       20/03/2023 : YAO - mise à jour des variable (/u0x)
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
