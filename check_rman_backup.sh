@@ -10,7 +10,6 @@ unset NLS_LANG
 #---------------------------------------------------------------------------
 # Fonction test_dba : teste si l'utilisateur est DBA
 #---------------------------------------------------------------------------
-function test_dba {
 if test "$(id|grep dba)"
   then
     return 0
@@ -21,10 +20,6 @@ if test "$(id|grep dba)"
     echo "============================================================="
     exit 1
 fi
-}
-
-
-test_dba;
 
 #---------------------------------------------------------------------------
 # reporter toutes les instances préntes sur ce serveur
