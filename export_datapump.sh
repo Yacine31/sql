@@ -3,29 +3,28 @@
 # Historique :
 #       14/09/2011 : YOU - Creation
 #       14/10/2015 : YOU - script générique pour toutes les bases
-#       15/12/2022 : YOU - retention de 7 jour, nommage avec nom du jour
+#       15/12/2022 : YOU - retention de 1 jour
+#       25/09/2023 : YOU - simplification du passage des paramètres
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 # fonction init : c'est ici qu'il faut modifier toutes les variables liées
 # à l'environnement
 #------------------------------------------------------------------------------
 export ORACLE_OWNER=oracle
+export MAIL_RCPT=yacine.oumghar@axiome.ai
 
 f_init() {
 
-	# positionner les variables d'environnement
-	export SCRIPTS_DIR=/home/oracle/scripts
-	# paramètres de lang
-	export LANG=en_US.UTF-8
-	export NLS_LANG=AMERICAN_AMERICA.${NLS_CHARACTERSET}
+        # positionner les variables d'environnement
+        export SCRIPTS_DIR=/home/oracle/scripts
+        # paramètres de lang
+        export LANG=en_US.UTF-8
+        export NLS_LANG=AMERICAN_AMERICA.${NLS_CHARACTERSET}
 
-	# répertoire destination de l'export
-	export EXP_LOCATION=/u03/backup/$ORACLE_SID/export
-	# nom du répertoire au niveau de la base de données
-	export DPDIR=EXPDP_DIR
-
-	# date = jour de la semaine : permet de garder 7 export en ligne
-	export JOUR_SEMAINE=$(date +%A)
+        # répertoire destination de l'export
+        export EXP_LOCATION=/u04/backup/$ORACLE_SID/expdp
+        # nom du répertoire au niveau de la base de données
+        export DPDIR=EXPDP_DIR
 } #f_init
 
 #------------------------------------------------------------------------------
@@ -35,7 +34,7 @@ f_help() {
 
 echo "
 
-syntaxe : $0 -s ORACLE_SID 
+syntaxe : $0 ORACLE_SID
 ------
 "
 exit $1
@@ -45,22 +44,6 @@ exit $1
 #----------------------------------------
 #------------ MAIN ----------------------
 #----------------------------------------
-
-unset ORACLE_SID
-
-while getopts :s:h o
-do
-        case $o in
-        s) ORACLE_SID=$OPTARG;
-        ;;
-        h) f_help 0;
-        ;;
-        *) f_help 2;
-        ;;
-        \?) f_help 2;
-        ;;
-        esac
-done
 
 [ "${ORACLE_SID}" ] || f_help 2;
 
@@ -79,7 +62,7 @@ fi
 export ORACLE_SID
 ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
-. oraenv -s
+. oraenv -s >/dev/null
 
 #------------------------------------------------------------------------------
 # recuperation du NLS_CHARACTERSET
@@ -113,8 +96,26 @@ grant read, write on directory $DPDIR to public;
 exit
 EOF
 
-
 #------------------------------------------------------------------------------
 # export des données
 #------------------------------------------------------------------------------
-$ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y directory=$DPDIR dumpfile=${ORACLE_SID}_${JOUR_SEMAINE}.dmp logfile=${ORACLE_SID}_${JOUR_SEMAINE}.log flashback_time=systimestamp reuse_dumpfiles=yes
+# suppression des anciens fichier tar, dump et log du répertoire
+rm -f ${EXP_LOCATION}/export_${ORACLE_SID}.{log,dmp,tgz}
+
+# export datapump
+$ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y directory=$DPDIR dumpfile=export_${ORACLE_SID}.dmp logfile=export_${ORACLE_SID}.log flashback_time=systimestamp reuse_dumpfiles=yes
+
+# compression du dump et son log dans un seul fichier et suppression des fichiers d'origine
+cd ${EXP_LOCATION}
+tar cfz export_${ORACLE_SID}.tgz export_${ORACLE_SID}.{dmp,log} && rm -f export_${ORACLE_SID}.dmp
+
+#------------------------------------------------------------------------------
+# Mail si des erreurs dans le fichier de sauvegarde
+#------------------------------------------------------------------------------
+EXPDP_LOG_FILE=${EXP_LOCATION}/export_${ORACLE_SID}.log
+ERR_COUNT=$(egrep "^EXP-[0-9]*|^ORA-[0-9]:" ${EXPDP_LOG_FILE} | wc -l)
+MSG=$(egrep "^EXP-[0-9]*|^ORA-[0-9]:" ${EXPDP_LOG_FILE})
+
+if [ ${ERR_COUNT} -ne 0 ]; then
+        curl -H "t: Erreur expdp base ${ORACLE_SID} sur le serveur $(hostname)" -d "$MSG" -L https://ntfy.axiome.io/expdp
+fi
