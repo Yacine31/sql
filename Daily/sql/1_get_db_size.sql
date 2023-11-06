@@ -1,8 +1,8 @@
 set head off
 select 'database size' from dual;
 set head on
-col TOTAL_SIZE_GB format 99,999.99
-SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) TOTAL_SIZE_GB FROM
+col "Total Database Size" format 99,999.99
+SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) "Total Database Size" FROM
 (
     SELECT SUM(FILE_SIZE_BLKS*BLOCK_SIZE) TAILLE_BYTES FROM V$CONTROLFILE
     UNION ALL
