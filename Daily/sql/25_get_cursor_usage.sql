@@ -1,4 +1,5 @@
 -- SCRIPT - to Set the 'SESSION_CACHED_CURSORS' and 'OPEN_CURSORS' Parameters Based on Usage (Doc ID 208857.1)
+prompt <h2>Sessions & Cursors usage </h2>
 select
 'session_cached_cursors' parameter,
 lpad(value, 5) value,

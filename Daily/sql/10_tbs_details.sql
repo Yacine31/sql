@@ -1,3 +1,4 @@
+prompt <h2>Tablespace details </h2>
 COL TABLESPACE_NAME FORMAT A20 HEAD "Nom espace|disque logique"
 COL PCT_OCCUPATION_THEORIQUE FORMAT 990.00 HEAD "%occ|Theo"
 COL TAILLE_MIB FORMAT 99999990.00 HEAD "Taille|MiB"

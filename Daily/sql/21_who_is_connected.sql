@@ -1,4 +1,5 @@
 -- Qui est connecté à la base :
+prompt <h2>Who is connected ? </h2>
 
 set pages 999 lines 200
 col PROGRAM for a35

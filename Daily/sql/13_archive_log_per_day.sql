@@ -1,3 +1,4 @@
+prompt <h2>Taille des redolog par jours / heure </h2>
 set head off
 select max('Taille des fichiers redolog (Mo) : ' || bytes/1024/1024) from v$log;
 

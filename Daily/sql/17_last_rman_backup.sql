@@ -1,3 +1,4 @@
+prompt <h2>Last RMAN backups </h2>
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set linesize 250 heading off;
 set heading on pagesize 999;
