@@ -1,3 +1,4 @@
+set head off
 col "Database Size" format 99,999.99
 select 'Database Size (Go) : ' || (
     SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) "Database Size" FROM
