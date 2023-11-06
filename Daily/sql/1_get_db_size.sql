@@ -1,4 +1,6 @@
--- set head off
+set head off
+select 'database size' from dual;
+set head on
 col TOTAL_SIZE_GB format 99,999.99
 SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) TOTAL_SIZE_GB FROM
 (
@@ -12,5 +14,4 @@ SELECT ROUND(SUM(TAILLE_BYTES)/1024/1024/1024,2) TOTAL_SIZE_GB FROM
     UNION ALL
     SELECT BYTES FROM V$STANDBY_LOG SL, V$LOGFILE LF WHERE SL.GROUP# = LF.GROUP#
 );
--- set head on
 exit
