@@ -22,6 +22,7 @@ do
 #         " > ${HTML_FILE}
 
         # sqlplus -s "/ as sysdba" @rapport_html.sql >> ${HTML_FILE}
+        cat sql/00_html_header.html >> ${HTML_FILE}
         for f in sql/*.sql
         do
                 # sqlplus -s "/ as sysdba" @$f >> ${HTML_FILE}
@@ -29,6 +30,8 @@ do
         done
 
         sed -i 's/<table.*>$/<table class="table table-striped">/g' ${HTML_FILE}
+
+        cat sql/99_html_footer.html >> ${HTML_FILE}
 
         echo Rapport dans le fichier html : ${HTML_FILE}
 done
