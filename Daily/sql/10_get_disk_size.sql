@@ -9,6 +9,14 @@ host lsblk -f
 prompt </pre>
 
 prompt <pre>
+host cat /etc/fstab
+prompt </pre>
+
+prompt <pre>
 host free -h
+prompt </pre>
+
+prompt <pre>
+host lscpu
 prompt </pre>
 exit
