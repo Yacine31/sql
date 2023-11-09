@@ -1,6 +1,7 @@
 prompt <h2>Table Statistics Summary</h2>
+alter session set nls_date_format='YYYY/MM/DD HH24:MI:SS';
 WITH x as (
-SELECT /*+  NO_MERGE  */ /* 3c.251 */
+SELECT /*+  NO_MERGE  */ 
        --con_id,
        owner,
        object_type,
