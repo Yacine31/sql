@@ -5,10 +5,10 @@ host df -h
 prompt </pre>
 
 prompt <pre>
-lsblk -f
+host lsblk -f
 prompt </pre>
 
 prompt <pre>
-free -h
+host free -h
 prompt </pre>
 exit
