@@ -66,6 +66,8 @@ f_print()
 # traitement de la ligne de commande
 #------------------------------------------------------------------------------
 
+ORACLE_SID=$1
+
 [ "${ORACLE_SID}" ] || f_help 2;
 
 # positionner les variables d'environnement ORACLE
