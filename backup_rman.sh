@@ -116,8 +116,8 @@ LOG_MODE=$(echo $LOG_MODE | sed 's/^\s*//g')
 if [ "$LOG_MODE" == "NOARCHIVELOG" ]; then
         echo "validate check logical database;" > ${RMAN_CMD_FILE}
 else
+        # run {
         echo "
-        run {
         CONFIGURE DEVICE TYPE DISK PARALLELISM $PARALLELISM ;
         CONFIGURE RETENTION POLICY TO REDUNDANCY ${BKP_REDUNDANCY};
         BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/data_%T_%t_%s_%p' TAG 'DATA_${DATE_JOUR}' AS COMPRESSED BACKUPSET DATABASE;
@@ -129,8 +129,8 @@ else
         BACKUP CURRENT CONTROLFILE FORMAT '${BKP_LOCATION}/control_%T_%t_%s_%p' TAG 'CTLFILE_${DATE_JOUR}';
         SQL \"ALTER DATABASE BACKUP CONTROLFILE TO TRACE AS ''${BKP_LOCATION}/${ORACLE_SID}_control_file.trc'' REUSE\";
         SQL \"CREATE PFILE=''${BKP_LOCATION}/pfile_${ORACLE_SID}.ora'' FROM SPFILE\";
-        }
         " > ${RMAN_CMD_FILE}
+        # }
 fi
 #------------------------------------------------------------------------------
 # Execution du script RMAN
