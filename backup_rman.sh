@@ -141,7 +141,8 @@ ${ORACLE_HOME}/bin/rman target / cmdfile=${RMAN_CMD_FILE} log=${BKP_LOG_FILE}
 #------------------------------------------------------------------------------
 # Mail si des erreurs dans le fichier de sauvegarde
 #------------------------------------------------------------------------------
-ERR_COUNT=$(egrep "^RMAN-[0-9]*|^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
+# ERR_COUNT=$(egrep "^RMAN-[0-9]*|^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
+ERR_COUNT=$(egrep "^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
 
 if [ ${ERR_COUNT} -ne 0 ]; then
         curl -H "t: Erreur RMAN base ${ORACLE_SID} sur le serveur $(hostname)" -d "$(cat ${BKP_LOG_FILE})" -L https://ntfy.axiome.io/backup-rman
