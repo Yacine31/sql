@@ -28,7 +28,7 @@ where a.file_id = b.file_id(+)
 column cmd format a75 word_wrapped
 
 select 'alter database datafile '''||file_name||''' resize ' ||
-ceil( (nvl(hwm,1)*&&blksize)/1024/1024 ) || 'm;' cmd
+ceil( (nvl(hwm,1)*&&blksize)/1024/1024 + 1) || 'm;' cmd
 from dba_data_files a,
 ( select file_id, max(block_id+blocks-1) hwm
 from dba_extents
