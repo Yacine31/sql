@@ -33,7 +33,7 @@ EOF
 
 pct_fra_used=$(echo ${fra_usage} | egrep -o "[0-9]*")
 
-if [ ${pct_fra_used} gt 85 ]
+if [ ${pct_fra_used} gt 65 ]
 then
     echo ${pct_fra_used} : backup des archivelog necessaire
 else
