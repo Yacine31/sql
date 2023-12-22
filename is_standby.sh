@@ -31,10 +31,11 @@ dbrole=$(sqlplus -s '/ as sysdba' << EOF
     set pages 0 feedback off;
     SELECT DATABASE_ROLE FROM V\$DATABASE;
 EOF
+)
 
 if [ "$dbrole" == "PHYSICAL STANDBY" ]
 then
-    return true
+    exit 0   # base standby
 else
-    return false
+    exit 1   # base autre
 fi
