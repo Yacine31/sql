@@ -35,7 +35,7 @@ EOF
 
 if [ "$dbrole" == "PRIMARY" ]
 then
-    return true
+    return 1
 else
-    return false
+    return 0
 fi
