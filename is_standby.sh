@@ -7,11 +7,10 @@
 #------------------------------------------------------------------------------
 f_help() {
 
-        cat <<CATEOF
-syntax : $O ORACLE_SID
-
-CATEOF
-exit $1
+echo 
+echo syntax : is_standby.sh ORACLE_SID
+echo
+exit $1 
 
 } #f_help
 

@@ -7,10 +7,9 @@
 #------------------------------------------------------------------------------
 f_help() {
 
-        cat <<CATEOF
-syntax : $O ORACLE_SID
-
-CATEOF
+echo 
+echo syntax : is_primary.sh ORACLE_SID
+echo
 exit $1
 
 } #f_help
