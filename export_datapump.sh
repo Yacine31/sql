@@ -11,7 +11,7 @@
 # à l'environnement
 #------------------------------------------------------------------------------
 export ORACLE_OWNER=oracle
-export MAIL_RCPT=yacine.oumghar@axiome.ai
+export MAIL_RCPT=yacine.oumghar@axiome.io
 
 f_init() {
 
