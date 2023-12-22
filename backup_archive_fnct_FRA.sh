@@ -7,7 +7,7 @@
 #
 # Vérification du paramètre d'entrée
 ORACLE_SID=$1
-[ "${ORACLE_SID}" ] || echo syntax : $0 ORACLE_SID && exit 2;
+[ "${ORACLE_SID}" ] || (echo syntax : $0 ORACLE_SID && exit 2);
 
 # Variables d'initialisation 
 script_dir=/home/oracle/scripts
