@@ -12,7 +12,7 @@ ORACLE_SID=$1
 # Variables d'initialisation 
 script_dir=/home/oracle/scripts
 pct_limit=80
-action_script="sh ${script_dir}/backup_rman_AL.sh ${ORACLE_SID}"
+action_script="${script_dir}/backup_rman_AL.sh ${ORACLE_SID}"
 
 #
 # positionner les variables d'environnement ORACLE
@@ -38,7 +38,5 @@ pct_fra_used=$(echo ${fra_usage} | egrep -o "[0-9]*")
 #
 if [ "${pct_fra_used}" -gt ${pct_limit} ]
 then
-    echo ${pct_fra_used} : backup des archivelog necessaire : ${action_script}
-else
-    echo ${pct_fra_used} : backup des archivelog NON necessaire
+    sh ${action_script}
 fi
