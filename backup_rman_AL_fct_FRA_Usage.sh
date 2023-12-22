@@ -38,5 +38,8 @@ pct_fra_used=$(echo ${fra_usage} | egrep -o "[0-9]*")
 #
 if [ "${pct_fra_used}" -gt ${pct_limit} ]
 then
+    echo ${pct_fra_used} : backup des archivelog necessaire par script ${action_script}
     sh ${action_script}
+else
+    echo ${pct_fra_used} : backup des archivelog non necessaire
 fi
