@@ -35,7 +35,7 @@ EOF
 
 if [ "$dbrole" == "PRIMARY" ]
 then
-    return 1
+    exit 0   # base primaire
 else
-    return 0
+    exit 1   # base autre
 fi
