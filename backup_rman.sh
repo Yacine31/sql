@@ -81,6 +81,9 @@ PATH=/usr/local/bin:$PATH
 #------------------------------------------------------------------------------
 f_init
 
+# si la base est standby on sort
+${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
+
 #------------------------------------------------------------------------------
 # si ce n'est pas le user oracle qui lance le script, on quitte
 #------------------------------------------------------------------------------
