@@ -29,6 +29,7 @@ fra_usage=$(sqlplus -s '/ as sysdba' << EOF
     set pages 0 feedback off;
     select round(sum(percent_space_used),0) from v\$flash_recovery_area_usage;
 EOF
- | egrep -o "[0-9]*")
+) 
 
-echo ${fra_usage}
+echo ${fra_usage} | egrep -o "[0-9]*"
+
