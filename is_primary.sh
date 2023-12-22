@@ -31,6 +31,7 @@ dbrole=$(sqlplus -s '/ as sysdba' << EOF
     set pages 0 feedback off;
     SELECT DATABASE_ROLE FROM V\$DATABASE;
 EOF
+)
 
 if [ "$dbrole" == "PRIMARY" ]
 then
