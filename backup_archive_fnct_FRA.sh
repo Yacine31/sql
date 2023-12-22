@@ -12,7 +12,7 @@ ORACLE_SID=$1
 # Variables d'initialisation 
 script_dir=/home/oracle/scripts
 pct_limit=85
-action_script=${script_dir}/backup_rman.sh -t AL ${ORACLE_SID}
+action_script="${script_dir}/backup_rman.sh -t AL ${ORACLE_SID}"
 
 #
 # positionner les variables d'environnement ORACLE
