@@ -4,10 +4,6 @@
 # pour sauvegarder les archivelog et purger la FRA
 # 
 
-# Variables d'initialisation 
-script_dir=/home/oracle/scripts
-pct_limit=80
-action_script="${script_dir}/backup_rman_AL.sh ${ORACLE_SID}"
 
 for sid in $(ps -ef | grep pmon | grep -v grep | cut -d_ -f3 | sort)
 do 
@@ -18,6 +14,11 @@ do
     ORAENV_ASK=NO
     PATH=/usr/local/bin:$PATH
     . oraenv -s >/dev/null
+
+    # Variables d'initialisation 
+    script_dir=/home/oracle/scripts
+    pct_limit=80
+    action_script="${script_dir}/backup_rman_AL.sh ${ORACLE_SID}"
 
     # 
     # calcul de la taille FRA 
