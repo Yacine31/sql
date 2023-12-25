@@ -18,4 +18,5 @@ select * from
              'SYNONYM'
         )
   )
-  order by owner;
+  order by owner
+;

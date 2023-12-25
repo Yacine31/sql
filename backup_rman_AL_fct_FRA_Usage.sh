@@ -1,8 +1,15 @@
+#!/bin/sh
 #
-# retourne le porucentage d'occupation de la FRA
-# Si il est supérieur à un poucentage limit, il lance un script 
-# pour sauvegarder les archivelog et purger la FRA
 # 
+#------------------------------------------------------------------------------
+# ORACLE DATABASE : BACKUP RMAN des AL
+# le script récupère le pourcentage d'occupation de la FRA
+# Si ce pourcentage est supérieur à un seuil prédéfinit, il lance un script 
+# pour sauvegarder les archivelog et purger la FRA
+#------------------------------------------------------------------------------
+# Historique :
+#       21/12/2023 : YOU - Creation 
+#------------------------------------------------------------------------------
 
 
 for sid in $(ps -ef | grep pmon | grep -v grep | cut -d_ -f3 | sort)
