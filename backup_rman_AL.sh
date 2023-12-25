@@ -102,14 +102,14 @@ install -d ${BKP_LOG_DIR}
 #
 # si une autre sauvegarde est en cours, on quitte
 #
-{RUNNING_RMAN}=$($ORACLE_HOME/bin/sqlplus -S / as sysdba <<EOF
+RUNNING_RMAN=$($ORACLE_HOME/bin/sqlplus -S / as sysdba <<EOF
 set heading off
 set feedback off
 set echo off
 select count(*) from v\$rman_backup_job_details where STATUS IN ('RUNNING', 'EXECUTING');
 EOF
 )
-{RUNNING_RMAN}=$(echo ${RUNNING_RMAN} | sed 's/^\s*//g')
+RUNNING_RMAN=$(echo ${RUNNING_RMAN} | sed 's/^\s*//g')
 
 if [ -n "${RUNNING_RMAN}" ]; then
     # RUNNING_RMAN n'est pas vide, donc backup RMAN en cours ... on quitte
