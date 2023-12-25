@@ -24,7 +24,7 @@ do
 
     # Variables d'initialisation 
     script_dir=/home/oracle/scripts
-    pct_limit=80
+    pct_limit=85
     action_script="${script_dir}/backup_rman_AL.sh ${ORACLE_SID}"
 
     # 

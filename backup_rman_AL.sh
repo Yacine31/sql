@@ -111,9 +111,11 @@ EOF
 )
 RUNNING_RMAN=$(echo ${RUNNING_RMAN} | sed 's/^\s*//g')
 
-if [ ${RUNNING_RMAN} -eq 0 ]; then
-    # RUNNING_RMAN n'est pas vide, donc backup RMAN en cours ... on quitte
-    f_print("Sauvegarde RMAN en cours ... fin du script")
+if [ "${RUNNING_RMAN}" -gt 0 ]; then
+    # RUNNING_RMAN retourne une valeur > 0, donc backup RMAN en cours ... on quitte
+    f_print "... "
+    f_print "Sauvegarde RMAN en cours ... fin du script"
+    f_print "... "
     exit 2
 fi
 
