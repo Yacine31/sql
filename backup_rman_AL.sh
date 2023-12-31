@@ -15,7 +15,7 @@ f_init() {
         export ORACLE_OWNER=oracle
 
         # les différents répertoires
-        export SCRIPTS_DIR=/home/oracle/scripts
+        export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
         export BKP_LOG_DIR=$SCRIPTS_DIR/logs
         export BKP_LOCATION=/u04/backup/${ORACLE_SID}/rman
 
@@ -39,7 +39,11 @@ f_init() {
 f_help() {
 
         cat <<CATEOF
-syntax : $O ORACLE_SID
+----
+syntax : $(basename "${BASH_SOURCE[0]}") ORACLE_SID
+----
+
+Sauvegarde RMAN des archives logs de la base passée en paramètre
 
 CATEOF
 exit $1
