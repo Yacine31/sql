@@ -41,6 +41,6 @@ install -d ${BKP_LOCATION}
 
 # compression du repertoire oracle app
 cd ${BKP_LOCATION}
-rm -fv backup_bin_oraapp_$(date +%Y%m%d).tgz
-sudo tar cfz backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORAAPP_LOCATION}
+rm -fv backup_bin_oraapp_*.tgz
+sudo tar cfz backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORAAPP_LOCATION} && curl -d "$(hostname) - backup des binaires terminée" https://ntfy.axiome.io/backup
 
