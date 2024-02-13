@@ -25,7 +25,7 @@ SELECT DISTINCT
     ||
     CASE
         WHEN type = 'DIRECTORY' THEN
-                ' DIRECTORY '
+                'DIRECTORY '
     END
     || owner
     || '.'
