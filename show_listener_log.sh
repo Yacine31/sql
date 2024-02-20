@@ -20,7 +20,7 @@ usage()
 cat << EOF
 usage: $(basename $0) options
 
-Le script fait un "tail -f" sur le fichier alertlog
+Le script localise le fichier log du listener et fait un "tail -f" sur ce fichier
 
 OPTIONS:
    -h      Affiche ce message
@@ -60,7 +60,7 @@ LISTENER_NAME="LISTENER"
 #--------------------------------------------
 # Traitement des paramètres de la ligne de commande
 #--------------------------------------------
-while getopts "hl:abcu" OPTION; do
+while getopts "hl:" OPTION; do
         case ${OPTION} in
           h)
                 usage
