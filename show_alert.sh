@@ -20,7 +20,7 @@ usage()
 cat << EOF
 usage: $(basename $0) options
 
-Le script fait un "tail -f" sur le fichier alertlog
+Le script trouve le chemin vers le fichier alertlog et fait un "tail -f" sur ce fichier
 
 OPTIONS:
    -h      Affiche ce message
@@ -62,7 +62,7 @@ INSTANCE=${ORACLE_SID}
 #--------------------------------------------
 # Traitement des paramètres de la ligne de commande
 #--------------------------------------------
-while getopts "hi:abcu" OPTION; do
+while getopts "hi:" OPTION; do
         case ${OPTION} in
           h)
                 usage
@@ -118,8 +118,14 @@ then
         export ORAENV_ASK=NO
         . oraenv -s >/dev/null
 
-        DIAG_DEST=$(echo "show parameter diagnostic_dest" | sqlplus / as sysdba | grep "^diagnostic_dest" | awk '{print $3}')
-        DB_UNIQ_NAME=$(echo "show parameter db_unique_name" | sqlplus / as sysdba | grep "^db_unique_name" | awk '{print $3}')
+        SQL1="set head off"
+        SQL2="select value from v\$parameter where name='diagnostic_dest';"
+        DIAG_DEST=$(echo -e "$SQL1\n$SQL2" | sqlplus -s / as sysdba | grep -v "^$")
+
+        SQL1="set head off"
+        SQL2="select value from v\$parameter where name='db_unique_name';"
+        DB_UNIQ_NAME=$(echo -e "$SQL1\n$SQL2" | sqlplus -s / as sysdba | grep -v "^$")
+
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 else
         # la base n'est pas démarrée, on récupère le chemin par défaut "uniquename/INSTANCE_NAME" 
