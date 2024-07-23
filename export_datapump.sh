@@ -59,8 +59,22 @@ then
 fi
 
 #------------------------------------------------------------------------------
-# positionner les variables d'environnement ORACLE
+# inititalisation des variables d'environnement
 #------------------------------------------------------------------------------
+f_init
+
+#------------------------------------------------------------------------------
+# positionner les variables d'environnement ORACLE
+# et vérifier si ORACLE_SID est dans /etc/orata
+#------------------------------------------------------------------------------
+ORATAB_COUNT=$(cat /etc/oratab | egrep -v '^$|^#' | grep "$ORACLE_SID:" | wc -l)
+if [ "${ORATAB_COUNT}" -ne 1 ]; then
+    f_print "... "
+    f_print "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
+    f_print "... "
+    exit 2
+fi
+
 export ORACLE_SID
 ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
@@ -77,11 +91,6 @@ select VALUE from nls_database_parameters where PARAMETER='NLS_CHARACTERSET';
 EOF
 )
 NLS_CHARACTERSET=$(echo $NLS_CHARACTERSET | sed 's/^\s*//g')
-
-#------------------------------------------------------------------------------
-# inititalisation des variables d'environnement
-#------------------------------------------------------------------------------
-f_init
 
 # creation du repertoire de sauvegarde. S'il existe la commande install ne fait rien
 install -d ${EXP_LOCATION}
