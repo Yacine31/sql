@@ -81,11 +81,8 @@ f_init
 #------------------------------------------------------------------------------
 # vérifier si ORACLE_SID est dans /etc/orata
 #------------------------------------------------------------------------------
-ORATAB_COUNT=$(cat /etc/oratab | egrep -v '^$|^#' | grep "$ORACLE_SID:" | wc -l)
-if [ "${ORATAB_COUNT}" -ne 1 ]; then
-    f_print "... "
-    f_print "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
-    f_print "... "
+if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
+    echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
     exit 2
 fi
 

@@ -100,14 +100,20 @@ done
 
 [ "${ORACLE_SID}" ] || f_help 2;
 
+# inititalisation des variables d'environnement
+f_init
+
+# vérifier si ORACLE_SID est pésente dans le fichier /etc/oratab
+if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
+    echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
+    exit 2
+fi
+
 # positionner les variables d'environnement ORACLE
 export ORACLE_SID
 ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
 . oraenv -s
-
-# inititalisation des variables d'environnement
-f_init
 
 
 # si ce n'est pas le user oracle qui lance le script, on quitte

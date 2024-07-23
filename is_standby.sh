@@ -22,6 +22,13 @@ ORACLE_SID=$1
 
 # positionner les variables d'environnement ORACLE
 export ORACLE_SID
+
+# vérifier si ORACLE_SID est dans /etc/orata
+if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
+    echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
+    exit 2
+fi
+
 ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
 . oraenv -s >/dev/null
