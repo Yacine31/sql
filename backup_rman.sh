@@ -73,7 +73,14 @@ ORACLE_SID=$1
 # positionner les variables d'environnement ORACLE
 export ORACLE_SID
 
+#------------------------------------------------------------------------------
+# inititalisation des variables d'environnement
+#------------------------------------------------------------------------------
+f_init
+
+#------------------------------------------------------------------------------
 # vérifier si ORACLE_SID est dans /etc/orata
+#------------------------------------------------------------------------------
 ORATAB_COUNT=$(cat /etc/oratab | egrep -v '^$|^#' | grep "$ORACLE_SID:" | wc -l)
 if [ "${ORATAB_COUNT}" -ne 1 ]; then
     f_print "... "
@@ -86,10 +93,6 @@ ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
 . oraenv -s >/dev/null
 
-#------------------------------------------------------------------------------
-# inititalisation des variables d'environnement
-#------------------------------------------------------------------------------
-f_init
 
 # si la base est standby on sort
 ${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
