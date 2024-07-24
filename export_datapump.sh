@@ -79,6 +79,9 @@ ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
 . oraenv -s >/dev/null
 
+# si la base est standby on sort
+${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
+
 #------------------------------------------------------------------------------
 # recuperation du NLS_CHARACTERSET
 #------------------------------------------------------------------------------

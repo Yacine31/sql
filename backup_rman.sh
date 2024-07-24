@@ -155,6 +155,7 @@ if [ "$LOG_MODE" == "NOARCHIVELOG" ]; then
 else
         # run {
         echo "
+        alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
         CONFIGURE DEVICE TYPE DISK PARALLELISM $PARALLELISM ;
         CONFIGURE RETENTION POLICY TO REDUNDANCY ${BKP_REDUNDANCY};
         CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '${BKP_LOCATION}/ctrlfile_auto_%F';

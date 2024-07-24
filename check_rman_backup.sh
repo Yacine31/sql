@@ -31,6 +31,13 @@ echo "-----------------------------------------------------"
 echo " Base de donnee a traiter: " $r
 echo "-----------------------------------------------------"
 export ORACLE_SID=$r
+
+# vérifier si ORACLE_SID est dans /etc/orata
+if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
+    echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
+    exit 2
+fi
+
 . oraenv -s > /dev/null
 sqlplus -S / as sysdba << EOF
 set head off pages 0 feedback off 
