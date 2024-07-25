@@ -11,34 +11,9 @@
 #       09/11/2022 : YOU - backup simple => db full
 #       10/08/2023 : YOU - base noarchivelog : execution de rman validate
 #       25/09/2023 : YOU - simplification, 1 seul parametre pour le script 
+#       25/07/2024 : YOU - fichier .env pour les variables d'environnement
 #------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------
-# fonction init : c'est ici qu'il faut modifier toutes les variables liées
-# à l'environnement
-#------------------------------------------------------------------------------
-f_init() {
-
-        export ORACLE_OWNER=oracle
-
-        # les différents répertoires
-        export SCRIPTS_DIR=/home/oracle/scripts
-        export BKP_LOG_DIR=$SCRIPTS_DIR/logs
-        export BKP_LOCATION=/u04/backup/${ORACLE_SID}/rman
-
-        # nombre de sauvegarde RMAN en ligne à garder
-        export BKP_REDUNDANCY=1
-        export DATE_JOUR=$(date +%Y.%m.%d-%H.%M)
-        export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_${ORACLE_SID}_${DATE_JOUR}.log
-        export RMAN_CMD_FILE=${BKP_LOG_DIR}/rman_cmd_file_${ORACLE_SID}.rman
-
-        # nombre de jours de conservation des logs de la sauvegarde
-        export BKP_LOG_RETENTION=15
-
-        # nombre de canaux à utiliser
-        export PARALLELISM=1
-
-} # f_init
 
 #------------------------------------------------------------------------------
 # fonction d'aide
@@ -76,7 +51,19 @@ export ORACLE_SID
 #------------------------------------------------------------------------------
 # inititalisation des variables d'environnement
 #------------------------------------------------------------------------------
-f_init
+
+# Nom du fichier .env
+ENV_FILE=".env"
+
+# Vérifier si le fichier .env existe
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
+    echo "Erreur : Impossible de charger les variables d'environnement."
+    exit 1
+fi
+
+# Charger les variables d'environnement depuis le fichier .env
+source "$ENV_FILE"
 
 #------------------------------------------------------------------------------
 # vérifier si ORACLE_SID est dans /etc/orata
@@ -184,7 +171,7 @@ ${ORACLE_HOME}/bin/rman target / cmdfile=${RMAN_CMD_FILE} log=${BKP_LOG_FILE}
 ERR_COUNT=$(egrep "^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
 
 if [ ${ERR_COUNT} -ne 0 ]; then
-        curl -H "t: Erreur RMAN base ${ORACLE_SID} sur le serveur $(hostname)" -d "$(cat ${BKP_LOG_FILE})" -L https://ntfy.axiome.io/backup-rman
+        curl -H "t: Erreur RMAN base ${ORACLE_SID} sur le serveur $(hostname)" -d "$(cat ${BKP_LOG_FILE})" -L ${NTFY_URL}
 fi
 
 #------------------------------------------------------------------------------

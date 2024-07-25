@@ -100,8 +100,22 @@ done
 
 [ "${ORACLE_SID}" ] || f_help 2;
 
+#------------------------------------------------------------------------------
 # inititalisation des variables d'environnement
-f_init
+#------------------------------------------------------------------------------
+
+# Nom du fichier .env
+ENV_FILE=".env"
+
+# Vérifier si le fichier .env existe
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
+    echo "Erreur : Impossible de charger les variables d'environnement."
+    exit 1
+fi
+
+# Charger les variables d'environnement depuis le fichier .env
+source "$ENV_FILE"
 
 # vérifier si ORACLE_SID est pésente dans le fichier /etc/oratab
 if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then

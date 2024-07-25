@@ -11,21 +11,6 @@
 # à l'environnement
 #------------------------------------------------------------------------------
 export ORACLE_OWNER=oracle
-export MAIL_RCPT=yacine.oumghar@axiome.io
-
-f_init() {
-
-        # positionner les variables d'environnement
-        export SCRIPTS_DIR=/home/oracle/scripts
-        # paramètres de lang
-        export LANG=en_US.UTF-8
-        export NLS_LANG=AMERICAN_AMERICA.${NLS_CHARACTERSET}
-
-        # répertoire destination de l'export
-        export EXP_LOCATION=/u04/backup/$ORACLE_SID/expdp
-        # nom du répertoire au niveau de la base de données
-        export DPDIR=EXPDP_DIR
-} #f_init
 
 #------------------------------------------------------------------------------
 # fonction d'aide
@@ -50,6 +35,22 @@ ORACLE_SID=$1
 [ "${ORACLE_SID}" ] || f_help 2;
 
 #------------------------------------------------------------------------------
+# inititalisation des variables d'environnement
+#------------------------------------------------------------------------------
+# Nom du fichier .env
+ENV_FILE=".env"
+
+# Vérifier si le fichier .env existe
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
+    echo "Erreur : Impossible de charger les variables d'environnement."
+    exit 1
+fi
+
+# Charger les variables d'environnement depuis le fichier .env
+source "$ENV_FILE"
+
+#------------------------------------------------------------------------------
 # si ce n'est pas le user oracle qui lance le script, on quitte
 #------------------------------------------------------------------------------
 if (test `whoami` != $ORACLE_OWNER)
@@ -57,11 +58,6 @@ then
   echo "Vous devez etre $ORACLE_OWNER pour lancer ce script"
   exit
 fi
-
-#------------------------------------------------------------------------------
-# inititalisation des variables d'environnement
-#------------------------------------------------------------------------------
-f_init
 
 #------------------------------------------------------------------------------
 # positionner les variables d'environnement ORACLE
@@ -93,6 +89,9 @@ select VALUE from nls_database_parameters where PARAMETER='NLS_CHARACTERSET';
 EOF
 )
 NLS_CHARACTERSET=$(echo $NLS_CHARACTERSET | sed 's/^\s*//g')
+
+# on complète la variable NLS_LANG qui vient du fichier .env avec la variable NLS_CHARACTERSET
+export NLS_LANG="${NLS_LANG}.${NLS_CHARACTERSET}"
 
 # creation du repertoire de sauvegarde. S'il existe la commande install ne fait rien
 install -d ${EXP_LOCATION}
@@ -130,5 +129,5 @@ ERR_COUNT=$(egrep "^EXP-[0-9]*|^ORA-[0-9]:" ${EXPDP_LOG_FILE} | wc -l)
 MSG=$(egrep "^EXP-[0-9]*|^ORA-[0-9]:" ${EXPDP_LOG_FILE})
 
 if [ ${ERR_COUNT} -ne 0 ]; then
-        curl -H "t: Erreur expdp base ${ORACLE_SID} sur le serveur $(hostname)" -d "$MSG" -L https://ntfy.axiome.io/expdp
+        curl -H "t: Erreur expdp base ${ORACLE_SID} sur le serveur $(hostname)" -d "$MSG" -L ${NTFY_URL}
 fi

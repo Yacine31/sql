@@ -11,6 +11,23 @@
 #       21/12/2023 : YOU - Creation 
 #------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
+# inititalisation des variables d'environnement
+#------------------------------------------------------------------------------
+
+# Nom du fichier .env
+ENV_FILE=".env"
+
+# Vérifier si le fichier .env existe
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
+    echo "Erreur : Impossible de charger les variables d'environnement."
+    exit 1
+fi
+
+# Charger les variables d'environnement depuis le fichier .env
+source "$ENV_FILE"
+
 
 for sid in $(ps -ef | grep pmon | grep -v grep | cut -d_ -f3 | sort)
 do 
@@ -29,11 +46,6 @@ do
     PATH=/usr/local/bin:$PATH
     . oraenv -s >/dev/null
 
-    # Variables d'initialisation 
-    script_dir=/home/oracle/scripts
-    pct_limit=85
-    action_script="${script_dir}/backup_rman_AL.sh ${ORACLE_SID}"
-
     # 
     # calcul de la taille FRA 
     #
@@ -48,10 +60,10 @@ EOF
     # 
     # Si la FRA dépasse la limite on lance le script
     #
-    if [ "${pct_fra_used}" -gt ${pct_limit} ]
+    if [ "${pct_fra_used}" -gt ${PCT_LIMIT} ]
     then
-        echo ${pct_fra_used} : backup des archivelog necessaire par script ${action_script}
-        sh ${action_script}
+        echo ${pct_fra_used} : backup des archivelog necessaire par script ${ACTION_SCRIPT}
+        sh ${ACTION_SCRIPT} ${ORACLE_SID}
     else
         echo ${pct_fra_used} : backup des archivelog non necessaire
     fi
