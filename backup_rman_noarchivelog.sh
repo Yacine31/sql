@@ -10,32 +10,6 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# fonction init : c'est ici qu'il faut modifier toutes les variables liees
-# a l'environnement
-#------------------------------------------------------------------------------
-f_init() {
-
-	export ORACLE_OWNER=oracle
-	export NLS_DATE_FORMAT="YYYY/MM/DD HH24:MI:SS"
-
-	# les differents repertoires
-	export SCRIPTS_DIR=/home/oracle/scripts
-	export BKP_LOG_DIR=$SCRIPTS_DIR/logs
-	export BKP_LOCATION=/u03/backup/${ORACLE_SID}/backup_rman
-
-	# nombre de canaux de sauvegarde en parallel
-	export BKP_PARALLELISM=3
-	# nombre de sauvegarde RMAN en ligne a garder
-	export BKP_REDUNDANCY=2
-	export DATE_JOUR=$(date +%Y%m%d-%H%M)
-	export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_${ORACLE_SID}_${DATE_JOUR}.log
-	export RMAN_CMD_FILE=${SCRIPTS_DIR}/rman_cmdfile_${ORACLE_SID}.rman
-	# nombre de jours de conservation des logs de la sauvegarde
-	export BKP_LOG_RETENTION=15
-
-} # f_init
-
-#------------------------------------------------------------------------------
 # fonction d'aide
 #------------------------------------------------------------------------------
 f_help() {
@@ -70,7 +44,7 @@ EOF
 		exit $1
 	fi
 
-} #f_help
+} #f_is_running
 
 #------------------------------------------------------------------------------
 # fonction d'affichage de la date ds les logs
@@ -104,8 +78,14 @@ done
 # inititalisation des variables d'environnement
 #------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
+# inititalisation des variables d'environnement
+#------------------------------------------------------------------------------
+
+export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+
 # Nom du fichier .env
-ENV_FILE=".env"
+ENV_FILE=${SCRIPTS_DIR}"/.env"
 
 # Vérifier si le fichier .env existe
 if [ ! -f "$ENV_FILE" ]; then
