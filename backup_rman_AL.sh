@@ -7,33 +7,6 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# fonction init : c'est ici qu'il faut modifier toutes les variables liées
-# à l'environnement
-#------------------------------------------------------------------------------
-f_init() {
-
-        export ORACLE_OWNER=oracle
-
-        # les différents répertoires
-        export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
-        export BKP_LOG_DIR=$SCRIPTS_DIR/logs
-        export BKP_LOCATION=/u04/backup/${ORACLE_SID}/rman
-
-        # nombre de sauvegarde RMAN en ligne à garder
-        export BKP_REDUNDANCY=1
-        export DATE_JOUR=$(date +%Y.%m.%d-%H.%M)
-        export BKP_LOG_FILE=${BKP_LOG_DIR}/backup_rman_AL_${ORACLE_SID}_${DATE_JOUR}.log
-        export RMAN_CMD_FILE=${BKP_LOG_DIR}/rman_cmd_file_${ORACLE_SID}.rman
-
-        # nombre de jours de conservation des logs de la sauvegarde
-        export BKP_LOG_RETENTION=15
-
-        # nombre de canaux à utiliser
-        export PARALLELISM=1
-
-} # f_init
-
-#------------------------------------------------------------------------------
 # fonction d'aide
 #------------------------------------------------------------------------------
 f_help() {
