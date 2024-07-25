@@ -3,44 +3,39 @@
 # Historique :
 #       25/09/2023 : YOU - premiere version pour sauvegarder les binaires
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-# fonction init : c'est ici qu'il faut modifier toutes les variables liées
-# à l'environnement
-#------------------------------------------------------------------------------
-
-f_init() {
-
-        # positionner les variables d'environnement
-        export SCRIPTS_DIR=/home/oracle/scripts
-
-        # répertoire source a sauvegarder
-        export ORAAPP_LOCATION=/u01/app
-
-        # répertoire destination de l'export
-        export BKP_LOCATION=/u04/
-} #f_init
-
 
 #----------------------------------------
 #------------ MAIN ----------------------
 #----------------------------------------
 
-
-
 #------------------------------------------------------------------------------
 # inititalisation des variables d'environnement
 #------------------------------------------------------------------------------
-f_init
+export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+
+# Nom du fichier .env
+ENV_FILE=${SCRIPTS_DIR}"/.env"
+
+# Vérifier si le fichier .env existe
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
+    echo "Erreur : Impossible de charger les variables d'environnement."
+    exit 1
+fi
+
+# Charger les variables d'environnement depuis le fichier .env
+source "$ENV_FILE"
+
 
 # creation du repertoire de sauvegarde. S'il existe la commande install ne fait rien
-install -d ${BKP_LOCATION}
+install -d ${BKP_APP_LOCATION}
 
 #------------------------------------------------------------------------------
 # sauvegarde
 #------------------------------------------------------------------------------
 
 # compression du repertoire oracle app
-cd ${BKP_LOCATION}
+cd ${BKP_APP_LOCATION}
 rm -fv backup_bin_oraapp_*.tgz
-sudo tar cfz backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORAAPP_LOCATION} && curl -d "$(hostname) - backup des binaires terminée" https://ntfy.axiome.io/backup
+sudo tar cfz backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORA_APP_LOCATION} && curl -d "$(hostname) - backup des binaires terminée" ${NTFY_URL}
 
