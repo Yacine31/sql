@@ -10,18 +10,7 @@
 # inititalisation des variables d'environnement
 #------------------------------------------------------------------------------
 
-# Nom du fichier .env
-ENV_FILE=".env"
-
-# Vérifier si le fichier .env existe
-if [ ! -f "$ENV_FILE" ]; then
-    echo "Erreur : Le fichier $ENV_FILE n'existe pas."
-    echo "Erreur : Impossible de charger les variables d'environnement."
-    exit 1
-fi
-
-# Charger les variables d'environnement depuis le fichier .env
-source "$ENV_FILE"
+export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 #------------------------------------------------------------------------------
 # toutes les bases ouvertes sont sauvegardées par le expdp

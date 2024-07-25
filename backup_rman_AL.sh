@@ -70,10 +70,11 @@ ORACLE_SID=$1
 #------------------------------------------------------------------------------
 # inititalisation des variables d'environnement
 #------------------------------------------------------------------------------
-# f_init
+
+export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 # Nom du fichier .env
-ENV_FILE=".env"
+ENV_FILE=${SCRIPTS_DIR}"/.env"
 
 # Vérifier si le fichier .env existe
 if [ ! -f "$ENV_FILE" ]; then
