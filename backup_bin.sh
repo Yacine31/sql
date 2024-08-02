@@ -41,7 +41,7 @@ rm -fv backup_bin_oraapp_*.tgz
 sudo tar --exclude="${ORA_APP_LOCATION}/oracle/admin" \
 --exclude="${ORA_APP_LOCATION}/oracle/audit" \
 --exclude="${ORA_APP_LOCATION}/oracle/diag" \
-cfz backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORA_APP_LOCATION} 
+-cfz backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORA_APP_LOCATION} 
 
 # notification
 curl -d "$(hostname) - backup des binaires terminée" ${NTFY_URL}
