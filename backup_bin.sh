@@ -38,7 +38,7 @@ cd ${BKP_APP_LOCATION}
 # suppression des anciennes sauvegardes
 rm -fv backup_bin_oraapp_*.tgz
 # compression du repertoire oracle app avec exclusion des répertoires admin, diag et audit
-sudo tar cfz ${BKP_APP_LOCATION}/backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORA_APP_LOCATION} 
+sudo tar cfz ${BKP_APP_LOCATION}/backup_bin_oraapp_$(date +%Y%m%d).tgz ${ORA_APP_LOCATION} \
 --exclude="${ORA_APP_LOCATION}/oracle/admin" \
 --exclude="${ORA_APP_LOCATION}/oracle/audit" \
 --exclude="${ORA_APP_LOCATION}/oracle/diag" 
