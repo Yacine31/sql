@@ -1,6 +1,8 @@
 #!/bin/bash
 #---------------------------------------------------------------------------
-# 24/01/2019 - YOU : Premiere version pour liter les backup RMAN de 30j
+# Historique :
+#       24/01/2019 : YOU - Premiere version pour liter les backup RMAN de 30j
+#       10/11/2025 : Gemini - Améliorations : syntaxe, lisibilité et robustesse
 #---------------------------------------------------------------------------
 # Environnement Variables
 export NLS_DATE_FORMAT='DD/MM/YYYY HH24:MI:SS'
@@ -10,10 +12,7 @@ unset NLS_LANG
 #---------------------------------------------------------------------------
 # Fonction test_dba : teste si l'utilisateur est DBA
 #---------------------------------------------------------------------------
-if test "$(id|grep dba)"
-  then
-    echo > /dev/null 
-  else
+if ! id | grep -q dba; then
     echo ""
     echo "============================================================="
     echo " Abandon, l'utilisateur doit appartenir au groupe DBA        "
@@ -25,29 +24,29 @@ fi
 # reporter toutes les instances préntes sur ce serveur
 #---------------------------------------------------------------------------
 
-for r in $(ps -eaf | grep pmon | egrep -v 'grep|ASM1|APX1' | cut -d '_' -f3)
+for r in $(ps -eaf | grep pmon | grep -Ev 'grep|ASM1|APX1' | cut -d '_' -f3)
 do
 echo "-----------------------------------------------------"
 echo " Base de donnee a traiter: " $r
 echo "-----------------------------------------------------"
 export ORACLE_SID=$r
 
-# vérifier si ORACLE_SID est dans /etc/orata
-if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
+# vérifier si ORACLE_SID est dans /etc/oratab
+if ! grep -q "^${ORACLE_SID}:" /etc/oratab; then
     echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
     exit 2
 fi
 
 . oraenv -s > /dev/null
 sqlplus -S / as sysdba << EOF
-set head off pages 0 feedback off 
-set linesize 250 heading off;
+set head off pages 0 feedback off linesize 250;
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 set heading on pagesize 999;
 column status format a25;
 column input_bytes_display format a12;
 column output_bytes_display format a12;
 column device_type format a10;
+SET SERVEROUTPUT ON;
 declare
         base varchar2(40) ;
         serv varchar2(40) ;

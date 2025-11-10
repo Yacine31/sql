@@ -1,3 +1,8 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# Historique :
+#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
+#------------------------------------------------------------------------------
 #
 # retourne true si la base est standby
 # 
@@ -8,7 +13,7 @@
 f_help() {
 
 echo 
-echo syntax : is_standby.sh ORACLE_SID
+echo "syntax : $0 ORACLE_SID"
 echo
 exit $1 
 
@@ -18,14 +23,14 @@ exit $1
 
 ORACLE_SID=$1
 
-[ "${ORACLE_SID}" ] || f_help 2;
+[ -n "${ORACLE_SID}" ] || f_help 2;
 
 # positionner les variables d'environnement ORACLE
 export ORACLE_SID
 
-# vérifier si ORACLE_SID est dans /etc/orata
+# vérifier si ORACLE_SID est dans /etc/oratab
 if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
-    echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
+    echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script" >&2
     exit 2
 fi
 

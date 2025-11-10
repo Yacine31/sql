@@ -1,30 +1,44 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# Historique :
+#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
+#------------------------------------------------------------------------------
+#
 # Purge ADR contents (adr_purge.sh)
 # 00 05 * * 0 adr_purge.sh
 # Add the above line with `crontab -e` to the oracle user's cron
 
-ALERT_RET="129600" # 90 Days
-INCIDENT_RET="43200" # 30 Days
-TRACE_RET="43200" # 30 Days
-CDUMP_RET="43200" # 30 Days
-HM_RET="43200" # 30 Days
+# --- Configuration de la rétention en JOURS ---
+ALERT_RET_DAYS=90
+INCIDENT_RET_DAYS=30
+TRACE_RET_DAYS=30
+CDUMP_RET_DAYS=30
+HM_RET_DAYS=30
 
-echo "INFO: adrci purge started at `date`"
+# --- Calcul de la rétention en MINUTES pour adrci ---
+ALERT_RET_MINUTES=$((ALERT_RET_DAYS * 24 * 60))
+INCIDENT_RET_MINUTES=$((INCIDENT_RET_DAYS * 24 * 60))
+TRACE_RET_MINUTES=$((TRACE_RET_DAYS * 24 * 60))
+CDUMP_RET_MINUTES=$((CDUMP_RET_DAYS * 24 * 60))
+HM_RET_MINUTES=$((HM_RET_DAYS * 24 * 60))
+
+echo "INFO: adrci purge started at $(date)"
 adrci exec="show homes"|grep -v 'ADR Homes' | while read file_line
 do
-    echo "INFO: adrci purging diagnostic destination " $file_line
-    echo "INFO: purging ALERT older than 90 days"
-    adrci exec="set homepath $file_line;purge -age $ALERT_RET -type ALERT"
-    echo "INFO: purging INCIDENT older than 30 days"
-    adrci exec="set homepath $file_line;purge -age $INCIDENT_RET -type INCIDENT"
-    echo "INFO: purging TRACE older than 30 days"
-    adrci exec="set homepath $file_line;purge -age $TRACE_RET -type TRACE"
-    echo "INFO: purging CDUMP older than 30 days"
-    adrci exec="set homepath $file_line;purge -age $CDUMP_RET -type CDUMP"
-    echo "INFO: purging HM older than 30 days"
-    adrci exec="set homepath $file_line;purge -age $HM_RET -type HM"
+    echo "INFO: adrci purging diagnostic destination \"$file_line\""
+    echo "INFO: purging ALERT older than $ALERT_RET_DAYS days"
+    adrci exec="set homepath '$file_line';purge -age $ALERT_RET_MINUTES -type ALERT"
+    echo "INFO: purging INCIDENT older than $INCIDENT_RET_DAYS days"
+    adrci exec="set homepath '$file_line';purge -age $INCIDENT_RET_MINUTES -type INCIDENT"
+    echo "INFO: purging TRACE older than $TRACE_RET_DAYS days"
+    adrci exec="set homepath '$file_line';purge -age $TRACE_RET_MINUTES -type TRACE"
+    echo "INFO: purging CDUMP older than $CDUMP_RET_DAYS days"
+    adrci exec="set homepath '$file_line';purge -age $CDUMP_RET_MINUTES -type CDUMP"
+    echo "INFO: purging HM older than $HM_RET_DAYS days"
+    adrci exec="set homepath '$file_line';purge -age $HM_RET_MINUTES -type HM"
     echo ""
     echo ""
 done
 echo
-echo "INFO: adrci purge finished at `date`"
+echo "INFO: adrci purge finished at $(date)"
 
