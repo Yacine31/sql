@@ -1,5 +1,7 @@
-#!/bin/sh
-
+#!/bin/bash
+#------------------------------------------------------------------------
+# Historique :
+#       10/11/2025 : Gemini - Améliorations : performance et robustesse
 #------------------------------------------------------------------------
 # Script pour récupérer les paramètres des bases avant migration
 # Exemple de sortie :
@@ -17,72 +19,97 @@
 # ora12os7.local,orcl1120,orcl1120,NOARCHIVELOG,NO,NO,NO
 #------------------------------------------------------------------------
 
-f_sql_param() {
-    param=$(sqlplus -s '/ as sysdba' << EOF
-    set pages 0 feedback off;
-    select value from v\$parameter where name='$1';
-EOF
-)
-    echo "$param"
-} #f_sql_param
-
-
-f_nls_param() {
-    param=$(sqlplus -s '/ as sysdba' << EOF
-    set pages 0 feedback off;
-    select value from nls_database_parameters where PARAMETER='$1';
-EOF
-)
-    echo "$param"
-} #f_nls_param
-
-f_db_param() {
-    param=$(sqlplus -s '/ as sysdba' << EOF
-    set pages 0 feedback off;
-    select $1 from v\$database;
-EOF
-)
-    echo "$param"
-} #f_db_param
-
-f_ins_host_name() {
-    param=$(sqlplus -s '/ as sysdba' << EOF
-    set pages 0 feedback off;
-    select host_name from v\$instance;
-EOF
-)
-    echo "$param"
-}
-
 export ORAENV_ASK=NO 
 
+# Consolidate SID discovery
+# Exclude ASM and APX instances
+ORACLE_SIDS=($(ps -ef | grep pmon | grep -Ev 'grep|\+ASM|\+APX' | awk '{print $8}' | cut -d_ -f3))
 
-echo db_name,db_unique_name,global_names,db_domain,compatible,service_names,memory_target,sga_target,pga_aggregate_target,processes,open_cursors
-ps -ef | grep pmon | grep -v grep | awk '{print $8}' | cut -d_ -f3 | while read sid
-do
-    export ORACLE_SID=${sid}
-    . oraenv -s
+# SQL query for the first block of parameters
+SQL_BLOCK1="
+set pagesize 0 feedback off heading off verify off
+select
+    (select host_name from v\$instance) || ',' ||
+    (select value from v\$parameter where name='db_name') || ',' ||
+    (select value from v\$parameter where name='db_unique_name') || ',' ||
+    (select value from v\$parameter where name='global_names') || ',' ||
+    (select value from v\$parameter where name='db_domain') || ',' ||
+    (select value from v\$parameter where name='compatible') || ',' ||
+    (select value from v\$parameter where name='service_names') || ',' ||
+    (select value from v\$parameter where name='memory_target') || ',' ||
+    (select value from v\$parameter where name='sga_target') || ',' ||
+    (select value from v\$parameter where name='pga_aggregate_target') || ',' ||
+    (select value from v\$parameter where name='processes') || ',' ||
+    (select value from v\$parameter where name='open_cursors')
+from dual;
+"
 
-    echo $(f_ins_host_name),$(f_sql_param "db_name"),$(f_sql_param "db_unique_name"),$(f_sql_param "global_names"),$(f_sql_param "db_domain"),$(f_sql_param "compatible"),$(f_sql_param "service_names"),$(f_sql_param "memory_target"),$(f_sql_param "sga_target"),$(f_sql_param "pga_aggregate_target"),$(f_sql_param "processes"),$(f_sql_param "open_cursors")
+# SQL query for the second block of parameters
+SQL_BLOCK2="
+set pagesize 0 feedback off heading off verify off
+select
+    (select host_name from v\$instance) || ',' ||
+    (select value from v\$parameter where name='db_name') || ',' ||
+    (select value from v\$parameter where name='db_unique_name') || ',' ||
+    (select value from nls_database_parameters where PARAMETER='NLS_CHARACTERSET') || ',' ||
+    (select value from nls_database_parameters where PARAMETER='NLS_NCHAR_CHARACTERSET') || ',' ||
+    (select value from nls_database_parameters where PARAMETER='NLS_SORT') || ',' ||
+    (select value from nls_database_parameters where PARAMETER='NLS_LANGUAGE') || ',' ||
+    (select value from nls_database_parameters where PARAMETER='NLS_TERRITORY')
+from dual;
+"
+
+# SQL query for the third block of parameters
+SQL_BLOCK3="
+set pagesize 0 feedback off heading off verify off
+select
+    (select host_name from v\$instance) || ',' ||
+    (select value from v\$parameter where name='db_name') || ',' ||
+    (select value from v\$parameter where name='db_unique_name') || ',' ||
+    LOG_MODE || ',' ||
+    FORCE_LOGGING || ',' ||
+    SUPPLEMENTAL_LOG_DATA_PL || ',' ||
+    FLASHBACK_ON
+from v\$database;
+"
+
+# Print headers
+echo "db_name,db_unique_name,global_names,db_domain,compatible,service_names,memory_target,sga_target,pga_aggregate_target,processes,open_cursors"
+
+# Loop through each discovered SID
+for sid in "${ORACLE_SIDS[@]}"; do
+    export ORACLE_SID="${sid}"
+    . oraenv -s > /dev/null 2>&1 # Suppress oraenv output
+
+    # Check if the database is actually up and accessible
+    if sqlplus -s / as sysdba <<< "select 1 from dual;" >/dev/null 2>&1; then
+        sqlplus -s / as sysdba <<< "$SQL_BLOCK1" | sed 's/^\s*//;s/\s*$//'
+    else
+        echo "ERROR: Could not connect to ${ORACLE_SID}. Skipping." >&2
+    fi
 done
 
 echo "---------"
-echo db_name,db_unique_name,NLS_CHARACTERSET,NLS_NCHAR_CHARACTERSET,NLS_SORT,NLS_LANGUAGE,NLS_TERRITORY
-ps -ef | grep pmon | grep -v grep | awk '{print $8}' | cut -d_ -f3 | while read sid
-do
-    export ORACLE_SID=${sid}
-    . oraenv -s
+echo "db_name,db_unique_name,NLS_CHARACTERSET,NLS_NCHAR_CHARACTERSET,NLS_SORT,NLS_LANGUAGE,NLS_TERRITORY"
 
-    echo $(f_ins_host_name),$(f_sql_param "db_name"),$(f_sql_param "db_unique_name"),$(f_nls_param "NLS_CHARACTERSET"),$(f_nls_param "NLS_NCHAR_CHARACTERSET"),$(f_nls_param "NLS_SORT"),$(f_nls_param "NLS_LANGUAGE"),$(f_nls_param "NLS_TERRITORY")
+for sid in "${ORACLE_SIDS[@]}"; do
+    export ORACLE_SID="${sid}"
+    . oraenv -s > /dev/null 2>&1
+
+    if sqlplus -s / as sysdba <<< "select 1 from dual;" >/dev/null 2>&1; then
+        sqlplus -s / as sysdba <<< "$SQL_BLOCK2" | sed 's/^\s*//;s/\s*$//'
+    fi
 done
 
 echo "---------"
-echo db_name,db_unique_name,LOG_MODE,FORCE_LOGGING,SUPPLEMENTAL_LOG_DATA_PL,FLASHBACK_ON
-ps -ef | grep pmon | grep -v grep | awk '{print $8}' | cut -d_ -f3 | while read sid
-do
-    export ORACLE_SID=${sid}
-    . oraenv -s
+echo "db_name,db_unique_name,LOG_MODE,FORCE_LOGGING,SUPPLEMENTAL_LOG_DATA_PL,FLASHBACK_ON"
 
-    echo $(f_ins_host_name),$(f_sql_param "db_name"),$(f_sql_param "db_unique_name"),$(f_db_param "LOG_MODE"),$(f_db_param "FORCE_LOGGING"),$(f_db_param "SUPPLEMENTAL_LOG_DATA_PL"),$(f_db_param "FLASHBACK_ON")
+for sid in "${ORACLE_SIDS[@]}"; do
+    export ORACLE_SID="${sid}"
+    . oraenv -s > /dev/null 2>&1
+
+    if sqlplus -s / as sysdba <<< "select 1 from dual;" >/dev/null 2>&1; then
+        sqlplus -s / as sysdba <<< "$SQL_BLOCK3" | sed 's/^\s*//;s/\s*$//'
+    fi
 done
 

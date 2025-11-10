@@ -1,7 +1,20 @@
 #!/bin/bash
+#------------------------------------------------------------------------------
+# Historique :
+#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
+#------------------------------------------------------------------------------
+#
+# Ce script vérifie les "Transfer Log Gap" et "Apply Log Gap" pour une base
+# de données Dbvisit Standby et alerte si le seuil est dépassé.
+#
+
+# --- Configuration ---
+THRESHOLD=10
+
+# --- Main ---
 
 # Vérifier si le nombre d'arguments est correct
-if [ "$#" -ne 1 ]; then
+if [[ "$#" -ne 1 ]]; then
     echo "Usage: $0 <DBNAME>"
     exit 1
 fi
@@ -17,19 +30,20 @@ transfer_log_gap=$(echo "$output" | awk '/Transfer Log Gap/{print $4}')
 apply_log_gap=$(echo "$output" | awk '/Apply Log Gap/{print $4}')
 
 # Test pour Transfer Log Gap
-if [ "$transfer_log_gap" -gt 10 ]; then
+if [[ "$transfer_log_gap" -gt "$THRESHOLD" ]]; then
     # Afficher le message d'alerte avec la valeur actuelle
-    echo "Alerte : La valeur de Transfer Log Gap ($transfer_log_gap) pour $DBNAME est supérieure à 10."
+    echo "Alerte : La valeur de Transfer Log Gap ($transfer_log_gap) pour $DBNAME est supérieure à $THRESHOLD."
 else
     # Afficher un message indiquant que tout est OK
-    echo "La valeur de Transfer Log Gap pour $DBNAME est inférieure ou égale à 10."
+    echo "OK : La valeur de Transfer Log Gap pour $DBNAME est de $transfer_log_gap (inférieure ou égale à $THRESHOLD)."
 fi
 
 # Test pour Apply Log Gap
-if [ "$apply_log_gap" -gt 10 ]; then
+if [[ "$apply_log_gap" -gt "$THRESHOLD" ]]; then
     # Afficher le message d'alerte avec la valeur actuelle
-    echo "Alerte : La valeur de Apply Log Gap ($apply_log_gap) pour $DBNAME est supérieure à 10."
+    echo "Alerte : La valeur de Apply Log Gap ($apply_log_gap) pour $DBNAME est supérieure à $THRESHOLD."
 else
     # Afficher un message indiquant que tout est OK
-    echo "La valeur de Apply Log Gap pour $DBNAME est inférieure ou égale à 10."
+    echo "OK : La valeur de Apply Log Gap pour $DBNAME est de $apply_log_gap (inférieure ou égale à $THRESHOLD)."
 fi
+

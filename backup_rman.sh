@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #------------------------------------------------------------------------------
 # ORACLE DATABASE : BACKUP RMAN DB + AL
 #------------------------------------------------------------------------------
@@ -12,7 +12,11 @@
 #       10/08/2023 : YOU - base noarchivelog : execution de rman validate
 #       25/09/2023 : YOU - simplification, 1 seul parametre pour le script 
 #       25/07/2024 : YOU - fichier .env pour les variables d'environnement
+#       10/11/2025 : Gemini - Améliorations : lisibilité, robustesse et bonnes pratiques
 #------------------------------------------------------------------------------
+
+# Ajout de set -o pipefail pour la gestion des erreurs dans les pipes
+set -o pipefail
 
 
 #------------------------------------------------------------------------------
@@ -21,7 +25,7 @@
 f_help() {
 
         cat <<CATEOF
-syntax : $O ORACLE_SID
+syntax : $0 ORACLE_SID
 
 CATEOF
 exit $1
@@ -33,7 +37,12 @@ exit $1
 #------------------------------------------------------------------------------
 f_print()
 {
-        echo "[`date +"%Y/%m/%d %H:%M:%S"`] : $1" >> $BKP_LOG_FILE
+        # on vérifie que le fichier de log est défini
+        if [ -z "${BKP_LOG_FILE}" ]; then
+                echo "[`date +"%Y/%m/%d %H:%M:%S"`] : $1"
+        else
+                echo "[`date +"%Y/%m/%d %H:%M:%S"`] : $1" >> $BKP_LOG_FILE
+        fi
 } #f_print
 
 
@@ -49,7 +58,7 @@ ORACLE_SID=$1
 export ORACLE_SID
 
 #------------------------------------------------------------------------------
-# inititalisation des variables d'environnement
+# initialisation des variables d'environnement
 #------------------------------------------------------------------------------
 export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
@@ -67,7 +76,27 @@ fi
 source "$ENV_FILE"
 
 #------------------------------------------------------------------------------
-# vérifier si ORACLE_SID est dans /etc/orata
+# Variables attendues dans le fichier .env :
+#------------------------------------------------------------------------------
+# ORACLE_OWNER : propritaire des binaires oracle (ex: oracle)
+# BKP_LOCATION : répertoire de stockage des backups (ex: /u01/backup/rman)
+# BKP_LOG_DIR : répertoire de stockage des logs (ex: /u01/backup/log)
+# BKP_REDUNDANCY : politique de rétention RMAN (ex: 3)
+# PARALLELISM : parallélisme pour les backups RMAN (ex: 4)
+# NTFY_URL : URL pour les notifications d'erreur (service ntfy.sh)
+# BKP_LOG_RETENTION : durée de rétention des fichiers de log (en jours, ex: 30)
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# initialisation des variables du script
+#------------------------------------------------------------------------------
+export BKP_TYPE="full"
+export DATE_JOUR=$(date +%Y%m%d)
+export RMAN_CMD_FILE="${BKP_LOG_DIR}/rman_cmd_${ORACLE_SID}_${DATE_JOUR}.rcv"
+export BKP_LOG_FILE="${BKP_LOG_DIR}/backup_rman_${BKP_TYPE}_${ORACLE_SID}_${DATE_JOUR}.log"
+
+#------------------------------------------------------------------------------
+# vérifier si ORACLE_SID est dans /etc/oratab
 #------------------------------------------------------------------------------
 if [ "$(grep -v '^$|^#' /etc/oratab | grep -c "^${ORACLE_SID}:")" -ne 1 ]; then
     echo "Base ${ORACLE_SID} absente du fichier /etc/oratab ... fin du script"
@@ -85,8 +114,7 @@ ${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
 #------------------------------------------------------------------------------
 # si ce n'est pas le user oracle qui lance le script, on quitte
 #------------------------------------------------------------------------------
-if (test `whoami` != $ORACLE_OWNER)
-then
+if [[ "$(whoami)" != "$ORACLE_OWNER" ]]; then
         echo
         echo "-----------------------------------------------------"
         echo "Vous devez etre $ORACLE_OWNER pour lancer ce script"
@@ -95,10 +123,10 @@ then
 fi
 
 #------------------------------------------------------------------------------
-# initialisation des chemins, s'ils n'existent pas ils seront créés par la commande install
+# initialisation des chemins, s'ils n'existent pas ils seront créés
 #------------------------------------------------------------------------------
-install -d ${BKP_LOCATION}
-install -d ${BKP_LOG_DIR}
+mkdir -p ${BKP_LOCATION}
+mkdir -p ${BKP_LOG_DIR}
 
 #------------------------------------------------------------------------------
 # génération du script de la sauvegarde RMAN
@@ -139,25 +167,25 @@ EOF
 LOG_MODE=$(echo $LOG_MODE | sed 's/^\s*//g')
 
 if [ "$LOG_MODE" == "NOARCHIVELOG" ]; then
-        echo "validate check logical database;" > ${RMAN_CMD_FILE}
+        cat > ${RMAN_CMD_FILE} <<EOF
+validate check logical database;
+EOF
 else
-        # run {
-        echo "
-        alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
-        CONFIGURE DEVICE TYPE DISK PARALLELISM $PARALLELISM ;
-        CONFIGURE RETENTION POLICY TO REDUNDANCY ${BKP_REDUNDANCY};
-        CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '${BKP_LOCATION}/ctrlfile_auto_%F';
-        BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/data_%T_%t_%s_%p' TAG 'DATA_${DATE_JOUR}' AS COMPRESSED BACKUPSET DATABASE;
-        SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
-        BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/arch_%T_%t_%s_%p' TAG 'ARCH_${DATE_JOUR}' AS COMPRESSED BACKUPSET ARCHIVELOG ALL DELETE ALL INPUT;
-        CROSSCHECK ARCHIVELOG ALL;
-        DELETE NOPROMPT OBSOLETE;
-        DELETE NOPROMPT EXPIRED BACKUPSET;
-        BACKUP CURRENT CONTROLFILE FORMAT '${BKP_LOCATION}/control_%T_%t_%s_%p' TAG 'CTLFILE_${DATE_JOUR}';
-        SQL \"ALTER DATABASE BACKUP CONTROLFILE TO TRACE AS ''${BKP_LOCATION}/${ORACLE_SID}_control_file.trc'' REUSE\";
-        SQL \"CREATE PFILE=''${BKP_LOCATION}/pfile_${ORACLE_SID}.ora'' FROM SPFILE\";
-        " > ${RMAN_CMD_FILE}
-        # }
+        cat > ${RMAN_CMD_FILE} <<EOF
+alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
+CONFIGURE DEVICE TYPE DISK PARALLELISM ${PARALLELISM} ;
+CONFIGURE RETENTION POLICY TO REDUNDANCY ${BKP_REDUNDANCY};
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '${BKP_LOCATION}/ctrlfile_auto_%F';
+BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/data_%T_%t_%s_%p' TAG 'DATA_${DATE_JOUR}' AS COMPRESSED BACKUPSET DATABASE;
+SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
+BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/arch_%T_%t_%s_%p' TAG 'ARCH_${DATE_JOUR}' AS COMPRESSED BACKUPSET ARCHIVELOG ALL DELETE ALL INPUT;
+CROSSCHECK ARCHIVELOG ALL;
+DELETE NOPROMPT OBSOLETE;
+DELETE NOPROMPT EXPIRED BACKUPSET;
+BACKUP CURRENT CONTROLFILE FORMAT '${BKP_LOCATION}/control_%T_%t_%s_%p' TAG 'CTLFILE_${DATE_JOUR}';
+SQL "ALTER DATABASE BACKUP CONTROLFILE TO TRACE AS ''${BKP_LOCATION}/${ORACLE_SID}_control_file.trc'' REUSE";
+SQL "CREATE PFILE=''${BKP_LOCATION}/pfile_${ORACLE_SID}.ora'' FROM SPFILE";
+EOF
 fi
 #------------------------------------------------------------------------------
 # Execution du script RMAN
@@ -166,17 +194,16 @@ f_print "------------------------- DEBUT DE LA BACKUP -------------------------"
 ${ORACLE_HOME}/bin/rman target / cmdfile=${RMAN_CMD_FILE} log=${BKP_LOG_FILE}
 
 #------------------------------------------------------------------------------
-# Mail si des erreurs dans le fichier de sauvegarde
+# Notification en cas d'erreur dans le fichier de sauvegarde
 #------------------------------------------------------------------------------
-# ERR_COUNT=$(egrep "^RMAN-[0-9]*|^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
-ERR_COUNT=$(egrep "^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
+ERR_COUNT=$(egrep "^RMAN-[0-9]*|^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
 
 if [ ${ERR_COUNT} -ne 0 ]; then
         curl -H "t: Erreur RMAN base ${ORACLE_SID} sur le serveur $(hostname)" -d "$(cat ${BKP_LOG_FILE})" -L ${NTFY_URL}
 fi
 
 #------------------------------------------------------------------------------
-# Nettoyage auto des logs : durée de concervation déterminée par la variable : ${BKP_LOG_RETENTION}
+# Nettoyage auto des logs : durée de conservation déterminée par la variable : ${BKP_LOG_RETENTION}
 #------------------------------------------------------------------------------
 
 f_print "------------------------- NETTOYAGE DES LOGS -------------------------"

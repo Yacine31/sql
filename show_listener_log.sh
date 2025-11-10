@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#------------------------------------------------------------------------------
+# Historique :
+#       10/11/2025 : Gemini - Améliorations : lisibilité, robustesse et efficacité
+#------------------------------------------------------------------------------
+
 LANG=C
 COL_NORMAL=$(tput sgr0)
 COL_ROUGE=$(tput setaf 1)
@@ -32,11 +37,11 @@ EOF
 #--------------------------------------------
 #--------------- Fonction d'affichage coloré du fichier log
 #--------------------------------------------
-show_alert()
+show_listener_log()
 {
         echo ${COL_ROUGE}
         echo ===========
-        echo Fichier alert : ${TRC_LOG}
+        echo Fichier log Listener : ${TRC_LOG}
         echo Ctrl + C pour quitter
         echo ===========
         echo ${COL_NORMAL}
@@ -46,8 +51,7 @@ show_alert()
                 -e "s,^($(date +'%Y-%m-%d')).*,${COL_JAUNE}&${COL_NORMAL},g" \
                 -e "s,.*WARNING.*,${COL_VIOLET}&${COL_NORMAL},g" \
                 -e "s,.*(ERROR:|ORA-|TNS-).*,${GRAS}${COL_ROUGE}&${COL_NORMAL},g" \
-                -e "s,.*(stop|start|Start).*,${COL_CYAN}&${COL_NORMAL},g" \
-                -e "s,.*,${COL_NORMAL}&${COL_NORMAL},"
+                -e "s,.*(stop|start|Start).*,${COL_CYAN}&${COL_NORMAL},g"
 
 }
 
@@ -92,14 +96,14 @@ UPPER_LISTENER_NAME=$(echo ${LISTENER_NAME} | tr 'a-z' 'A-Z')
 
 # determiner si le listener est démarrée ou pas
 
-if [ $(ps -ef | grep "tnslsnr ${UPPER_LISTENER_NAME}" | grep -v grep | wc -l) -eq 1 ] ;
+if pgrep -f "tnslsnr ${UPPER_LISTENER_NAME}" >/dev/null ;
 then
         # listener démarré, on lui demande le chemin vers le fichier log
-        TRC_DIR=$(lsnrctl show trc_directory ${UPPER_LISTENER_NAME} | grep "^LISTENER parameter" | cut -d' ' -f6)
+        TRC_DIR=$(lsnrctl show trc_directory ${UPPER_LISTENER_NAME} | grep "TRC_DIRECTORY =" | cut -d'=' -f2 | tr -d '[:space:]"')
         TRC_LOG=${TRC_DIR}/${LOWER_LISTENER_NAME}.log
 else
         # le listener n'est pas démarré, on récupère le chemin par défaut 
-        DIAG_DEST=$(adrci exec="SHOW BASE" | grep -o '".*"' | tr -d '"')
+        DIAG_DEST=$(adrci exec="SHOW BASE" | grep "ADR base is" | cut -d'"' -f2)
         H_NAME=$(hostname | cut -d. -f1)
         TRC_LOG="${DIAG_DEST}/diag/tnslsnr/${H_NAME}/${LOWER_LISTENER_NAME}/trace/${LOWER_LISTENER_NAME}.log"
 fi
@@ -109,10 +113,10 @@ fi
 #--------------------------------------------
 if [ -e "${TRC_LOG}" ]
 then
-        show_alert
+        show_listener_log
 else
         echo
-        echo "le fichier : ${COL_ROUGE}${GRAS_ARR_PLAN}${TRC_LOG}${COL_NORMAL} est introuvable !!"
+        echo "le fichier : ${COL_ROUGE}${GRAS}${TRC_LOG}${COL_NORMAL} est introuvable !!"
         echo
         exit 1
 echo

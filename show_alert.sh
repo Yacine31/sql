@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#------------------------------------------------------------------------------
+# Historique :
+#       10/11/2025 : Gemini - Améliorations : lisibilité, robustesse et efficacité
+#------------------------------------------------------------------------------
+
 LANG=C
 COL_NORMAL=$(tput sgr0)
 COL_ROUGE=$(tput setaf 1)
@@ -48,8 +53,7 @@ show_alert()
                 -e "s,.*WARNING.*,${COL_VIOLET}&${COL_NORMAL},g" \
                 -e "s,.*(ERROR:|ORA-|drop|DROP|Delete).*,${GRAS}${COL_ROUGE}&${COL_NORMAL},g" \
                 -e "s,^(ARC|RFS|LNS|MRP).*,${COL_BLUE}&${COL_NORMAL},g" \
-                -e "s,.*(Online Redo|online redo|Current log).*,${COL_CYAN}&${COL_NORMAL},g" \
-                -e "s,.*,${COL_NORMAL}&${COL_NORMAL},"
+                -e "s,.*(Online Redo|online redo|Current log).*,${COL_CYAN}&${COL_NORMAL},g"
 
 }
 
@@ -88,7 +92,7 @@ fi
 # determiner si c'est une instance DB ou ASM
 # si l'instant est ASM alors le sous reprtoire est asm, sinon rdbms
 #--------------------------------------------
-if [ "$(echo ${ORACLE_SID} | tr A-Z a-z | grep asm)" ]; then
+if [[ "${ORACLE_SID}" == "+ASM"* ]]; then
         SUB_DIR="asm"
 else
         SUB_DIR="rdbms"
@@ -97,7 +101,7 @@ fi
 #--------------------------------------------
 # determiner si l'instance est dans /etc/oratab
 #--------------------------------------------
-if [ $(cat /etc/oratab | grep "^${ORACLE_SID}:" | grep -v grep | wc -l) -eq 0 ] ;
+if ! grep -q "^${ORACLE_SID}:" /etc/oratab ;
 then
         # pas d'entrée dans /etc/oratab
         echo "-----"
@@ -109,7 +113,7 @@ fi
 #--------------------------------------------
 # determiner si l'instance est démarrée ou pas
 #--------------------------------------------
-if [ $(ps -ef | grep pmon_${ORACLE_SID}\$ | grep -v grep | wc -l) -eq 1 ] ;
+if pgrep -f "pmon_${ORACLE_SID}$" >/dev/null ;
 then
         # instance démarrée, on lui demande le chemin vers l'alertlog
 
@@ -118,13 +122,15 @@ then
         export ORAENV_ASK=NO
         . oraenv -s >/dev/null
 
-        SQL1="set head off"
-        SQL2="select value from v\$parameter where name='diagnostic_dest';"
-        DIAG_DEST=$(echo -e "$SQL1\n$SQL2" | sqlplus -s / as sysdba | grep -v "^$")
-
-        SQL1="set head off"
-        SQL2="select value from v\$parameter where name='db_unique_name';"
-        DB_UNIQ_NAME=$(echo -e "$SQL1\n$SQL2" | sqlplus -s / as sysdba | grep -v "^$")
+        SQL_QUERY="
+        set pagesize 0 feedback off heading off verify off
+        select value from v\$parameter where name='diagnostic_dest';
+        select value from v\$parameter where name='db_unique_name';
+        "
+        # Exécute la requête SQL, filtre les lignes vides/blanches, et supprime les espaces en début/fin de ligne
+        SQL_OUTPUT=$(echo -e "$SQL_QUERY" | sqlplus -s / as sysdba | grep -vE '^\s*$' | sed 's/^\s*//g;s/\s*$//g')
+        DIAG_DEST=$(echo "$SQL_OUTPUT" | head -n 1)
+        DB_UNIQ_NAME=$(echo "$SQL_OUTPUT" | tail -n 1)
 
         F_ALERT="${DIAG_DEST}/diag/${SUB_DIR}/$(echo ${DB_UNIQ_NAME} | tr 'A-Z' 'a-z')/${ORACLE_SID}/trace/alert_${ORACLE_SID}.log"
 else
@@ -144,7 +150,7 @@ then
 else
         echo
         echo "-----"
-        echo "----- le fichier : ${COL_ROUGE}${GRAS_ARR_PLAN}${F_ALERT}${COL_NORMAL} est introuvable !!"
+        echo "----- le fichier : ${COL_ROUGE}${GRAS}${F_ALERT}${COL_NORMAL} est introuvable !!"
         echo "-----"
         echo
         exit 1
