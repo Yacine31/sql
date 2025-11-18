@@ -1,7 +1,7 @@
 #!/bin/bash
 #------------------------------------------------------------------------------
 # Historique :
-#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
+#       10/11/2025 : Améliorations : lisibilité 
 #------------------------------------------------------------------------------
 #
 # Purge ADR contents (adr_purge.sh)
