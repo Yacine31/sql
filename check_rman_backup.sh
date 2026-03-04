@@ -2,7 +2,7 @@
 #---------------------------------------------------------------------------
 # Historique :
 #       24/01/2019 : YOU - Premiere version pour liter les backup RMAN de 30j
-#       10/11/2025 : Gemini - Améliorations : syntaxe, lisibilité et robustesse
+#       10/11/2025 : Améliorations : syntaxe, lisibilité et robustesse
 #---------------------------------------------------------------------------
 # Environnement Variables
 export NLS_DATE_FORMAT='DD/MM/YYYY HH24:MI:SS'
@@ -46,6 +46,8 @@ column status format a25;
 column input_bytes_display format a12;
 column output_bytes_display format a12;
 column device_type format a10;
+column time_taken format a10;
+
 SET SERVEROUTPUT ON;
 declare
         base varchar2(40) ;
@@ -62,6 +64,7 @@ select
         to_char(b.start_time,'DD-MM-YYYY HH24:MI') "Start Time",
         to_char(b.end_time,'DD-MM-YYYY HH24:MI') "End Time",
         b.output_device_type device_type,
+        b.time_taken_display time_taken,
         b.input_bytes_display,
         b.output_bytes_display
 FROM v\$rman_backup_job_details b
