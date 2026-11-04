@@ -12,7 +12,6 @@
 #       10/08/2023 : YOU - base noarchivelog : execution de rman validate
 #       25/09/2023 : YOU - simplification, 1 seul parametre pour le script 
 #       25/07/2024 : YOU - fichier .env pour les variables d'environnement
-#       10/11/2025 : Gemini - Améliorations : lisibilité, robustesse et bonnes pratiques
 #------------------------------------------------------------------------------
 
 # Ajout de set -o pipefail pour la gestion des erreurs dans les pipes

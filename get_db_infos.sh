@@ -1,7 +1,6 @@
 #!/bin/bash
 #------------------------------------------------------------------------
 # Historique :
-#       10/11/2025 : Gemini - Améliorations : performance et robustesse
 #------------------------------------------------------------------------
 # Script pour récupérer les paramètres des bases avant migration
 # Exemple de sortie :

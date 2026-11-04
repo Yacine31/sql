@@ -5,7 +5,6 @@
 #       14/10/2015 : YOU - script générique pour toutes les bases
 #       15/12/2022 : YOU - retention de 1 jour
 #       25/09/2023 : YOU - simplification du passage des paramètres
-#       10/11/2025 : Gemini - Améliorations : lisibilité, robustesse et bonnes pratiques
 #------------------------------------------------------------------------------
 
 # Ajout de set -o pipefail pour la gestion des erreurs dans les pipes

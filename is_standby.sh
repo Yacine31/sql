@@ -1,7 +1,6 @@
 #!/bin/bash
 #------------------------------------------------------------------------------
 # Historique :
-#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
 #------------------------------------------------------------------------------
 #
 # retourne true si la base est standby

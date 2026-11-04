@@ -5,7 +5,6 @@
 # Il offre des options pour définir la durée de rétention, un mode verbeux et un mode "dry-run".
 #------------------------------------------------------------------------------
 # Historique :
-#       10/11/2025 : Gemini - Améliorations : syntaxe, lisibilité et robustesse
 #------------------------------------------------------------------------------
 
 # Find the FULL path of the script, and add the directory it is in to the PATH,

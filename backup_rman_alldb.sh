@@ -3,7 +3,6 @@
 # ORACLE DATABASE : BACKUP ALL B
 #------------------------------------------------------------------------------
 # Historique :
-#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
 #------------------------------------------------------------------------------
 
 export SCRIPTS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)

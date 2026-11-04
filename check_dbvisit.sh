@@ -1,7 +1,6 @@
 #!/bin/bash
 #------------------------------------------------------------------------------
 # Historique :
-#       10/11/2025 : Gemini - Améliorations : lisibilité et robustesse
 #------------------------------------------------------------------------------
 #
 # Ce script vérifie les "Transfer Log Gap" et "Apply Log Gap" pour une base
