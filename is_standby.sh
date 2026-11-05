@@ -41,7 +41,7 @@ PATH=/usr/local/bin:$PATH
 . oraenv -s >/dev/null
 
 # le marqueur <<'SQL' protège le $ de V$DATABASE
-if ! dbrole=$(sqlplus -s -L '/ as sysdba' <<'SQL'
+if ! dbrole=$(sqlplus -s -L '/ as sysdba' 2>&1 <<'SQL'
     whenever sqlerror exit failure
     whenever oserror exit failure
     set pages 0 feedback off;

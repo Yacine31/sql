@@ -101,7 +101,7 @@ ${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
 # recuperation du NLS_CHARACTERSET
 # cette requête vérifie aussi que la base répond, avant de toucher aux fichiers
 #------------------------------------------------------------------------------
-if ! NLS_CHARACTERSET=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba <<'SQL'
+if ! NLS_CHARACTERSET=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba 2>&1 <<'SQL'
         whenever sqlerror exit failure
         whenever oserror exit failure
         set heading off
@@ -125,7 +125,7 @@ mkdir -p ${EXP_LOCATION} || f_erreur "Impossible de créer le répertoire ${EXP_
 # creation du répertoire DPDIR au niveau de la base
 # marqueur <<SQL sans apostrophes : le bloc utilise les variables du shell
 #------------------------------------------------------------------------------
-if ! SQL_OUTPUT=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba <<SQL
+if ! SQL_OUTPUT=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba 2>&1 <<SQL
         whenever sqlerror exit failure
         whenever oserror exit failure
         set heading off
