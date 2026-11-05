@@ -12,6 +12,7 @@
 #       10/08/2023 : YOU - base noarchivelog : execution de rman validate
 #       25/09/2023 : YOU - simplification, 1 seul parametre pour le script 
 #       25/07/2024 : YOU - fichier .env pour les variables d'environnement
+#       05/11/2026 : YOU - gestion des erreurs SQL*Plus et RMAN
 #------------------------------------------------------------------------------
 
 # Ajout de set -o pipefail pour la gestion des erreurs dans les pipes
@@ -43,6 +44,16 @@ f_print()
                 echo "[`date +"%Y/%m/%d %H:%M:%S"`] : $1" >> $BKP_LOG_FILE
         fi
 } #f_print
+
+#------------------------------------------------------------------------------
+# fonction d'erreur : trace le message, envoie la notification et quitte
+#------------------------------------------------------------------------------
+f_erreur() {
+        echo "$1" >&2
+        [ -d "${BKP_LOG_DIR}" ] && f_print "$1"
+        curl -H "t: Erreur RMAN base ${ORACLE_SID} sur le serveur $(hostname)" -d "$1" -L ${NTFY_URL}
+        exit 1
+} #f_erreur
 
 
 #------------------------------------------------------------------------------
@@ -107,8 +118,13 @@ PATH=/usr/local/bin:$PATH
 . oraenv -s >/dev/null
 
 
-# si la base est standby on sort
-${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
+# si la base est standby on sort, si son rôle est illisible on signale l'erreur
+ROLE_MSG=$(${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} 2>&1)
+case $? in
+        0) exit 2 ;;
+        1) ;;
+        *) f_erreur "Impossible de déterminer le rôle de la base : ${ROLE_MSG}" ;;
+esac
 
 #------------------------------------------------------------------------------
 # si ce n'est pas le user oracle qui lance le script, on quitte
@@ -134,13 +150,18 @@ mkdir -p ${BKP_LOG_DIR}
 #
 # si une autre sauvegarde est en cours, on quitte
 #
-RUNNING_RMAN=$($ORACLE_HOME/bin/sqlplus -S / as sysdba <<EOF
-set heading off
-set feedback off
-set echo off
-select count(*) from v\$rman_backup_job_details where STATUS IN ('RUNNING', 'EXECUTING');
-EOF
-)
+if ! RUNNING_RMAN=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba 2>&1 <<'SQL'
+        whenever sqlerror exit failure
+        whenever oserror exit failure
+        set heading off
+        set feedback off
+        set echo off
+        select count(*) from v$rman_backup_job_details where STATUS IN ('RUNNING', 'EXECUTING');
+        exit
+SQL
+); then
+        f_erreur "Impossible de vérifier si une sauvegarde RMAN est en cours : ${RUNNING_RMAN}"
+fi
 RUNNING_RMAN=$(echo ${RUNNING_RMAN} | sed 's/^\s*//g')
 
 if [ "${RUNNING_RMAN}" -gt 0 ]; then
@@ -156,13 +177,18 @@ fi
 #       - si archivelog : on sauvegarde la base
 #       - sinon : on fait validate check logical database
 #
-LOG_MODE=$($ORACLE_HOME/bin/sqlplus -S / as sysdba <<EOF
-set heading off
-set feedback off
-set echo off
-select LOG_MODE from V\$DATABASE;
-EOF
-)
+if ! LOG_MODE=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba 2>&1 <<'SQL'
+        whenever sqlerror exit failure
+        whenever oserror exit failure
+        set heading off
+        set feedback off
+        set echo off
+        select LOG_MODE from V$DATABASE;
+        exit
+SQL
+); then
+        f_erreur "Impossible de lire le mode archivelog : ${LOG_MODE}"
+fi
 LOG_MODE=$(echo $LOG_MODE | sed 's/^\s*//g')
 
 if [ "$LOG_MODE" == "NOARCHIVELOG" ]; then
@@ -191,13 +217,15 @@ fi
 #------------------------------------------------------------------------------
 f_print "------------------------- DEBUT DE LA BACKUP -------------------------"
 ${ORACLE_HOME}/bin/rman target / cmdfile=${RMAN_CMD_FILE} log=${BKP_LOG_FILE}
+RMAN_RC=$?
 
 #------------------------------------------------------------------------------
 # Notification en cas d'erreur dans le fichier de sauvegarde
 #------------------------------------------------------------------------------
-ERR_COUNT=$(egrep "^RMAN-[0-9]*|^ORA-[0-9]:" ${BKP_LOG_FILE} | wc -l)
+# RMAN-08120 et RMAN-08137 : archivelogs conservés pour une standby, avertissements normaux
+ERR_COUNT=$(egrep "^RMAN-[0-9]+:|^ORA-[0-9]+:" ${BKP_LOG_FILE} | egrep -v "^RMAN-(08120|08137):" | wc -l)
 
-if [ ${ERR_COUNT} -ne 0 ]; then
+if [ ${RMAN_RC} -ne 0 ] || [ ${ERR_COUNT} -ne 0 ]; then
         curl -H "t: Erreur RMAN base ${ORACLE_SID} sur le serveur $(hostname)" -d "$(cat ${BKP_LOG_FILE})" -L ${NTFY_URL}
 fi
 
@@ -208,3 +236,5 @@ fi
 f_print "------------------------- NETTOYAGE DES LOGS -------------------------"
 find ${BKP_LOG_DIR} -type f -iname "backup_rman_${BKP_TYPE}*.log" -mtime +${BKP_LOG_RETENTION} -exec rm -fv "{}" \; >> $BKP_LOG_FILE
 f_print "------------------------- BACKUP ${BKP_TYPE} TERMINE -------------------------"
+
+exit ${RMAN_RC}
