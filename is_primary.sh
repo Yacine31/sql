@@ -4,6 +4,9 @@
 #------------------------------------------------------------------------------
 #
 # retourne true si la base est primaire
+# codes retour : 0 = base primaire, 1 = autre rôle,
+#                2 = paramètre absent ou base absente de /etc/oratab,
+#                3 = rôle illisible (erreur SQL*Plus)
 # 
 
 #------------------------------------------------------------------------------
@@ -37,11 +40,18 @@ ORAENV_ASK=NO
 PATH=/usr/local/bin:$PATH
 . oraenv -s >/dev/null
 
-dbrole=$(sqlplus -s '/ as sysdba' << EOF
+# le marqueur <<'SQL' protège le $ de V$DATABASE
+if ! dbrole=$(sqlplus -s -L '/ as sysdba' <<'SQL'
+    whenever sqlerror exit failure
+    whenever oserror exit failure
     set pages 0 feedback off;
-    SELECT DATABASE_ROLE FROM V\$DATABASE;
-EOF
-)
+    SELECT DATABASE_ROLE FROM V$DATABASE;
+    exit
+SQL
+); then
+    echo "Impossible de lire le rôle de la base ${ORACLE_SID} : ${dbrole}" >&2
+    exit 3
+fi
 
 if [ "$dbrole" == "PRIMARY" ]
 then
