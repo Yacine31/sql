@@ -110,24 +110,37 @@ then
 fi
 
 #--------------------------------------------
+# positionner les variables d'environnement (ORACLE_HOME), que l'instance soit démarrée ou non
+#--------------------------------------------
+export ORACLE_SID
+export ORAENV_ASK=NO
+. oraenv -s >/dev/null
+
+#--------------------------------------------
 # determiner si l'instance est démarrée ou pas
 #--------------------------------------------
 if pgrep -f "pmon_${ORACLE_SID}$" >/dev/null ;
 then
         # instance démarrée, on lui demande le chemin vers l'alertlog
 
-        # Potionner les variables d'environnement
-        export ORACLE_SID
-        export ORAENV_ASK=NO
-        . oraenv -s >/dev/null
-
-        SQL_QUERY="
+        # Exécute la requête SQL : le marqueur <<'SQL' protège les $ des vues v$
+        # sqlplus n'est pas dans un pipe, pour pouvoir tester son code retour
+        if ! SQL_OUTPUT=$(sqlplus -s -L / as sysdba <<'SQL'
+        whenever sqlerror exit failure
+        whenever oserror exit failure
         set pagesize 0 feedback off heading off verify off
-        select value from v\$parameter where name='diagnostic_dest';
-        select value from v\$parameter where name='db_unique_name';
-        "
-        # Exécute la requête SQL, filtre les lignes vides/blanches, et supprime les espaces en début/fin de ligne
-        SQL_OUTPUT=$(echo -e "$SQL_QUERY" | sqlplus -s / as sysdba | grep -vE '^\s*$' | sed 's/^\s*//g;s/\s*$//g')
+        select value from v$parameter where name='diagnostic_dest';
+        select value from v$parameter where name='db_unique_name';
+        exit
+SQL
+        ); then
+                echo "Échec de la requête SQL*Plus sur l'instance ${ORACLE_SID} :" >&2
+                echo "${SQL_OUTPUT}" >&2
+                exit 1
+        fi
+
+        # Filtre les lignes vides/blanches, et supprime les espaces en début/fin de ligne
+        SQL_OUTPUT=$(echo "$SQL_OUTPUT" | grep -vE '^\s*$' | sed 's/^\s*//g;s/\s*$//g')
         DIAG_DEST=$(echo "$SQL_OUTPUT" | head -n 1)
         DB_UNIQ_NAME=$(echo "$SQL_OUTPUT" | tail -n 1)
 
