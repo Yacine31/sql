@@ -95,6 +95,7 @@ source "$ENV_FILE"
 # PARALLELISM : parallélisme pour les backups RMAN (ex: 4)
 # NTFY_URL : URL pour les notifications d'erreur (service ntfy.sh)
 # BKP_LOG_RETENTION : durée de rétention des fichiers de log (en jours, ex: 30)
+# BKP_DELETE_BEFORE : YES pour supprimer les sauvegardes avant la nouvelle (défaut : NO)
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -196,11 +197,20 @@ if [ "$LOG_MODE" == "NOARCHIVELOG" ]; then
 validate check logical database;
 EOF
 else
+        # BKP_DELETE_BEFORE=YES : place disque insuffisante pour garder l'ancienne sauvegarde pendant la nouvelle
+        if [ "${BKP_DELETE_BEFORE}" == "YES" ]; then
+                DELETE_BEFORE_CMD="CROSSCHECK BACKUP;
+DELETE NOPROMPT BACKUP;"
+        else
+                DELETE_BEFORE_CMD=""
+        fi
+
         cat > ${RMAN_CMD_FILE} <<EOF
 alter session set nls_date_format='DD/MM/YYYY HH24:MI:SS' ;
 CONFIGURE DEVICE TYPE DISK PARALLELISM ${PARALLELISM} ;
 CONFIGURE RETENTION POLICY TO REDUNDANCY ${BKP_REDUNDANCY};
 CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '${BKP_LOCATION}/ctrlfile_auto_%F';
+${DELETE_BEFORE_CMD}
 BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/data_%T_%t_%s_%p' TAG 'DATA_${DATE_JOUR}' AS COMPRESSED BACKUPSET DATABASE;
 SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
 BACKUP DEVICE TYPE DISK FORMAT '${BKP_LOCATION}/arch_%T_%t_%s_%p' TAG 'ARCH_${DATE_JOUR}' AS COMPRESSED BACKUPSET ARCHIVELOG ALL DELETE ALL INPUT;

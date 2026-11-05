@@ -76,7 +76,7 @@ SQL
 ); then
         # ORA-01507 : instance en NOMOUNT (restauration, duplication...), ce n'est pas une anomalie
         case "${fra_usage}" in
-            *ORA-01507*) echo "${ORACLE_SID} : base non montée, FRA non lue" ;;
+            *ORA-01507*) echo "Base ${ORACLE_SID} : base non montée, FRA non lue" ;;
             *) f_erreur "Impossible de lire l'occupation de la FRA : ${fra_usage}" ;;
         esac
         continue
@@ -87,7 +87,7 @@ SQL
     # le résultat doit être un entier ; il est vide si la base n'a pas de FRA
     case "${pct_fra_used}" in
         "")
-            echo "${ORACLE_SID} : pas de FRA configurée"
+            echo "Base ${ORACLE_SID} : pas de FRA configurée"
             continue
             ;;
         *[!0-9]*)
@@ -101,7 +101,26 @@ SQL
     #
     if [ "${pct_fra_used}" -gt ${PCT_LIMIT} ]
     then
-        echo ${pct_fra_used} : backup des archivelog necessaire par script ${ACTION_SCRIPT}
+        # si une sauvegarde RMAN est en cours, on n'en lance pas une autre
+        if ! RUNNING_RMAN=$(sqlplus -s -L '/ as sysdba' 2>&1 <<'SQL'
+            whenever sqlerror exit failure
+            whenever oserror exit failure
+            set pages 0 feedback off;
+            select count(*) from v$rman_backup_job_details where STATUS IN ('RUNNING', 'EXECUTING');
+            exit
+SQL
+); then
+            f_erreur "Impossible de vérifier si une sauvegarde RMAN est en cours : ${RUNNING_RMAN}"
+            continue
+        fi
+
+        RUNNING_RMAN=$(echo ${RUNNING_RMAN})
+        if [ "${RUNNING_RMAN}" -gt 0 ]; then
+            echo "Base ${ORACLE_SID} - occupation FRA=${pct_fra_used}%, limite ${PCT_LIMIT}% : sauvegarde RMAN en cours, pas de nouvelle sauvegarde"
+            continue
+        fi
+
+        echo "Base ${ORACLE_SID} - occupation FRA=${pct_fra_used}%, limite ${PCT_LIMIT}% : lancement du backup des archivelog par le script ${ACTION_SCRIPT}"
         sh ${ACTION_SCRIPT} ${ORACLE_SID}
         ACTION_RC=$?
         # 2 = sauvegarde déjà en cours ou base standby ; le script notifie lui-même ses autres erreurs
@@ -110,7 +129,7 @@ SQL
             EXIT_RC=1
         fi
     else
-        echo ${pct_fra_used} : backup des archivelog non necessaire
+        echo "Base ${ORACLE_SID} - occupation FRA=${pct_fra_used}%, limite ${PCT_LIMIT}% : backup des archivelog non necessaire"
     fi
 done
 
