@@ -5,6 +5,7 @@
 #       14/10/2015 : YOU - script générique pour toutes les bases
 #       15/12/2022 : YOU - retention de 1 jour
 #       25/09/2023 : YOU - simplification du passage des paramètres
+#       05/11/2026 : YOU - gestion des erreurs, ancien export conservé jusqu'au nouveau
 #------------------------------------------------------------------------------
 
 # Ajout de set -o pipefail pour la gestion des erreurs dans les pipes
@@ -23,6 +24,15 @@ syntaxe : $0 ORACLE_SID
 exit 
 
 } #f_help
+
+#------------------------------------------------------------------------------
+# fonction d'erreur : affiche le message, envoie la notification et quitte
+#------------------------------------------------------------------------------
+f_erreur() {
+        echo "$1" >&2
+        curl -H "t: Erreur expdp base ${ORACLE_SID} sur le serveur $(hostname)" -d "$1" -L ${NTFY_URL}
+        exit 1
+} #f_erreur
 
 #----------------------------------------
 #------------ MAIN ----------------------
@@ -89,54 +99,81 @@ ${SCRIPTS_DIR}/is_standby.sh ${ORACLE_SID} && exit 2
 
 #------------------------------------------------------------------------------
 # recuperation du NLS_CHARACTERSET
+# cette requête vérifie aussi que la base répond, avant de toucher aux fichiers
 #------------------------------------------------------------------------------
-NLS_CHARACTERSET=$($ORACLE_HOME/bin/sqlplus -S / as sysdba <<EOF
-set heading off
-set feedback off
-set echo off
-select VALUE from nls_database_parameters where PARAMETER='NLS_CHARACTERSET';
-EOF
-)
+if ! NLS_CHARACTERSET=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba <<'SQL'
+        whenever sqlerror exit failure
+        whenever oserror exit failure
+        set heading off
+        set feedback off
+        set echo off
+        select VALUE from nls_database_parameters where PARAMETER='NLS_CHARACTERSET';
+        exit
+SQL
+); then
+        f_erreur "Échec de la lecture du NLS_CHARACTERSET : ${NLS_CHARACTERSET}"
+fi
 NLS_CHARACTERSET=$(echo $NLS_CHARACTERSET | sed 's/^\s*//g')
 
 # on complète la variable NLS_LANG qui vient du fichier .env avec la variable NLS_CHARACTERSET
 export NLS_LANG="${NLS_LANG}.${NLS_CHARACTERSET}"
 
 # creation du repertoire de sauvegarde. S'il existe la commande ne fait rien
-mkdir -p ${EXP_LOCATION}
+mkdir -p ${EXP_LOCATION} || f_erreur "Impossible de créer le répertoire ${EXP_LOCATION}"
 
 #------------------------------------------------------------------------------
 # creation du répertoire DPDIR au niveau de la base
+# marqueur <<SQL sans apostrophes : le bloc utilise les variables du shell
 #------------------------------------------------------------------------------
-$ORACLE_HOME/bin/sqlplus -S / as sysdba <<EOF
-set heading off
-set feedback off
-set echo off
-create or replace directory $DPDIR as '${EXP_LOCATION}';
-grant read, write on directory $DPDIR to public;
-exit
-EOF
+if ! SQL_OUTPUT=$($ORACLE_HOME/bin/sqlplus -S -L / as sysdba <<SQL
+        whenever sqlerror exit failure
+        whenever oserror exit failure
+        set heading off
+        set feedback off
+        set echo off
+        create or replace directory $DPDIR as '${EXP_LOCATION}';
+        grant read, write on directory $DPDIR to public;
+        exit
+SQL
+); then
+        f_erreur "Échec de la création du directory ${DPDIR} : ${SQL_OUTPUT}"
+fi
 
 #------------------------------------------------------------------------------
 # export des données
 #------------------------------------------------------------------------------
-# suppression des anciens fichier tar, dump et log du répertoire
-rm -f ${EXP_LOCATION}/export_${ORACLE_SID}.{log,dmp,tgz}
+# suppression des anciens fichier dump et log du répertoire
+# l'ancien tgz est conservé tant que le nouveau n'est pas complet
+rm -f ${EXP_LOCATION}/export_${ORACLE_SID}.{log,dmp,tgz.tmp}
 
 # export datapump
 $ORACLE_HOME/bin/expdp \'/ as sysdba\' full=y directory=$DPDIR dumpfile=export_${ORACLE_SID}.dmp logfile=export_${ORACLE_SID}.log flashback_time=systimestamp reuse_dumpfiles=yes
+EXPDP_RC=$?
+
+# code retour expdp : 0 = succès, 5 = terminé avec des erreurs ou avertissements, autre = échec
+if [ ${EXPDP_RC} -ne 0 ] && [ ${EXPDP_RC} -ne 5 ]; then
+        f_erreur "Échec de expdp (code retour ${EXPDP_RC}), ancien export conservé. $(grep -E "^EXP-[0-9]+:|^ORA-[0-9]+:" ${EXP_LOCATION}/export_${ORACLE_SID}.log 2>/dev/null)"
+fi
 
 # compression du dump et son log dans un seul fichier et suppression des fichiers d'origine
-cd ${EXP_LOCATION}
-tar cfz export_${ORACLE_SID}.tgz export_${ORACLE_SID}.{dmp,log} && rm -f export_${ORACLE_SID}.dmp
+# le tgz est créé sous un nom temporaire puis renommé : l'ancien reste valide si tar échoue
+cd ${EXP_LOCATION} || f_erreur "Impossible d'accéder au répertoire ${EXP_LOCATION}"
+if ! tar cfz export_${ORACLE_SID}.tgz.tmp export_${ORACLE_SID}.{dmp,log}; then
+        rm -f export_${ORACLE_SID}.tgz.tmp
+        f_erreur "Échec de la compression, ancien export conservé, dump disponible dans ${EXP_LOCATION}"
+fi
+mv -f export_${ORACLE_SID}.tgz.tmp export_${ORACLE_SID}.tgz || f_erreur "Échec du renommage de export_${ORACLE_SID}.tgz.tmp"
+rm -f export_${ORACLE_SID}.dmp
 
 #------------------------------------------------------------------------------
 # Notification en cas d'erreur dans le fichier de sauvegarde
 #------------------------------------------------------------------------------
 EXPDP_LOG_FILE=${EXP_LOCATION}/export_${ORACLE_SID}.log
-ERR_COUNT=$(grep -E "^EXP-[0-9]*|^ORA-[0-9]:" ${EXPDP_LOG_FILE} | wc -l)
-MSG=$(grep -E "^EXP-[0-9]*|^ORA-[0-9]:" ${EXPDP_LOG_FILE})
+ERR_COUNT=$(grep -E "^EXP-[0-9]+:|^ORA-[0-9]+:" ${EXPDP_LOG_FILE} | wc -l)
+MSG=$(grep -E "^EXP-[0-9]+:|^ORA-[0-9]+:" ${EXPDP_LOG_FILE})
 
 if [ ${ERR_COUNT} -ne 0 ]; then
         curl -H "t: Erreur expdp base ${ORACLE_SID} sur le serveur $(hostname)" -d "$MSG" -L ${NTFY_URL}
 fi
+
+exit ${EXPDP_RC}
